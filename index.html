@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alien Hives — Battle Guide (vs Human Defense Force)</title>
+<style>
+  :root{
+    --bg:#0e1410; --panel:#16201a; --panel2:#1d2a22; --ink:#e9f1ea; --muted:#9fb3a4;
+    --acc:#7ec850; --acc2:#46c0a0; --warn:#e2a23b; --danger:#e4675b; --line:#2a3a30;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding-bottom:env(safe-area-inset-bottom)}
+  header{padding:18px 16px 12px;background:linear-gradient(180deg,#13201a,#0e1410);border-bottom:1px solid var(--line)}
+  header h1{margin:0;font-size:20px;letter-spacing:.2px}
+  header .vs{margin:4px 0 0;color:var(--muted);font-size:13px}
+  header .tag{display:inline-block;margin-top:8px;font-size:11px;color:#0e1410;background:var(--acc);
+    padding:2px 8px;border-radius:999px;font-weight:700}
+  nav.tabs{position:sticky;top:0;z-index:10;display:flex;background:#0e1410;border-bottom:1px solid var(--line)}
+  nav.tabs button{flex:1;appearance:none;border:0;background:transparent;color:var(--muted);
+    padding:14px 6px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent}
+  nav.tabs button.active{color:var(--acc);border-bottom-color:var(--acc);background:#121b15}
+  main{max-width:760px;margin:0 auto;padding:16px 14px 60px}
+  .tab{display:none}
+  .tab.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:.3}to{opacity:1}}
+  h2{font-size:18px;margin:22px 0 8px;color:var(--acc);border-left:3px solid var(--acc);padding-left:9px}
+  h3{font-size:14px;margin:14px 0 4px;color:var(--acc2);text-transform:uppercase;letter-spacing:.5px}
+  p{margin:6px 0}
+  section.unit,section#pregame,section[id^="round"],section#glossary,section#goals-intro,.card{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+  ol,ul{margin:6px 0 6px 2px;padding-left:20px}
+  li{margin:8px 0}
+  ol>li>strong{color:var(--ink)}
+  ol>li>p{margin:3px 0 0;color:var(--muted);font-size:14px}
+  strong{color:#f4fbf2}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--acc2)}
+  dl{margin:4px 0}
+  dt{font-weight:700;color:var(--acc2);margin-top:10px}
+  dd{margin:2px 0 0;color:var(--muted);font-size:14px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+  .chips a{font-size:12px;font-weight:700;color:var(--acc);background:#13201a;border:1px solid var(--line);
+    padding:7px 12px;border-radius:999px;text-decoration:none}
+  .tag-official{font-size:10px;font-weight:800;color:#0e1410;background:var(--acc);padding:1px 7px;border-radius:999px;vertical-align:middle}
+  .tag-strategic{font-size:10px;font-weight:800;color:#0e1410;background:var(--warn);padding:1px 7px;border-radius:999px;vertical-align:middle}
+  .provenance{font-size:13px;color:var(--muted);background:#11190f;border:1px dashed var(--line);border-radius:10px;padding:10px 12px}
+  .goal-list li{font-size:14px}
+  .selector{position:sticky;top:49px;z-index:5;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:12px;margin:12px 0}
+  .selector label{display:block;font-size:11px;font-weight:800;color:var(--acc2);text-transform:uppercase;letter-spacing:.6px;margin:6px 0 3px}
+  .selector select{width:100%;padding:11px;font-size:15px;background:#0e1410;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;-webkit-appearance:none;appearance:none}
+  .selrow{display:flex;gap:10px}
+  .selrow>div{flex:1}
+  #stratOut{background:var(--panel);border:1px solid var(--acc);border-radius:12px;padding:14px;margin-top:12px}
+  #stratOut .combo{font-size:12px;font-weight:800;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .dont{color:var(--danger);font-weight:700}
+  .note{color:var(--warn)}
+  footer{max-width:760px;margin:0 auto;padding:18px 14px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+  a{color:var(--acc2)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐛 Alien Hives — Battle Guide</h1>
+  <p class="vs">1000 pts • Grimdark Future v3.5.1 • vs Bill's Human Defense Force gunline</p>
+  <span class="tag">You win on MARKERS, not kills</span>
+</header>
+
+<nav class="tabs">
+  <button class="active" data-tab="rounds">Each Round</button>
+  <button data-tab="strategy">Strategy</button>
+  <button data-tab="army">My Army</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1: EACH ROUND + DEFINITIONS ============ -->
+<div id="rounds" class="tab active">
+  <div class="chips">
+    <a href="#pregame">Pre-Game</a><a href="#round1">R1</a><a href="#round2">R2</a>
+    <a href="#round3">R3</a><a href="#round4">R4</a><a href="#glossary">Definitions</a>
+  </div>
+
+  <section id="pregame">
+    <h2>Before You Start (Pre-Game)</h2>
+    <p>Do these three things before Round 1. Get them right and the game is half-won — your army is built to cross the table and grab ground, not to win a shooting match.</p>
+    <ol>
+      <li><strong>Step 1 — Place objective markers where YOU can reach them fast.</strong>
+        <p>WHY: You and your opponent take turns putting down the D3+2 markers (3, 4, or 5 of them). Your whole army is Fast and runs across the board; the Human gunline wants to sit still and shoot. Place markers toward the middle and the open lanes where your beasts and Soul-Snatchers can sprint onto them. You win by controlling markers at the end of Round 4 — put them where your legs give you the advantage.</p></li>
+      <li><strong>Step 2 — Deploy beasts in front, fast units on the flanks.</strong>
+        <p>WHY: Put your 2 Carnivo-Rex up front and centered. They are Tough 12 and each caps any enemy Blast weapon to a single hit, so they are the cheapest place for the enemy to waste their big guns. Behind/beside them, place Soul-Snatchers, Ravenous Beasts, and the Snatcher Lord on the flanks — using the Rex as a moving wall while they sweep around toward the enemy's artillery and support.</p></li>
+      <li><strong>Step 3 — Try to go first.</strong>
+        <p>WHY: Going first lets you start closing immediately, before the gunline gets a full round of long-range shooting. Every inch you move turn 1 is an inch they can't shoot you crossing twice.</p></li>
+    </ol>
+  </section>
+
+  <section id="round1">
+    <h2>Round 1 — Cross the Gap</h2>
+    <p>Goal: nobody fights yet. You are closing distance and putting the right bodies in front of the enemy's guns. Remember you ALTERNATE — one unit each, back and forth.</p>
+    <ol>
+      <li><strong>Step 1 — Rush both Carnivo-Rex straight up the middle (12" each, no shooting).</strong>
+        <p>WHY: Rush is the fastest way forward and the Rex have no guns worth using. They're Tough 12 and Blast-capped to 1 hit — the safest thing to put in the open. Let the enemy waste heavy weapons on them.</p></li>
+      <li><strong>Step 2 — Advance your Soul-Snatchers (6"+2" Fast = 8") staying behind the Rex or terrain.</strong>
+        <p>WHY: They're your main scorers/tank-chewers but only Defense 4 — keep them shielded so they arrive alive.</p></li>
+      <li><strong>Step 3 — Rush the Ravenous Beasts up a flank (12"+4" Fast = 16").</strong>
+        <p>WHY: 16" gets them most of the way across. Send them down a side lane toward objectives and softer support, away from the densest firepower.</p></li>
+      <li><strong>Step 4 — Rush the Snatcher Lord up the opposite flank (16"), using cover.</strong>
+        <p>WHY: He's your objective-runner. Push him wide and forward, near terrain so he isn't an easy single-model kill.</p></li>
+      <li><strong>Step 5 — End the round. Do not charge yet.</strong>
+        <p>WHY: Charging from too far fails and leaves you exposed. Spend Round 1 entirely on positioning; the fight starts next round.</p></li>
+    </ol>
+  </section>
+
+  <section id="round2">
+    <h2>Round 2 — Hit the Line</h2>
+    <p>Goal: slam your beasts into the enemy front line while your fast units race past it to the guns behind. Melee is where your army wins.</p>
+    <ol>
+      <li><strong>Step 1 — Charge your first Carnivo-Rex into the nearest enemy unit.</strong>
+        <p>WHY: The charger STRIKES FIRST — 13 AP1 attacks on 4+ before they hit back. Charging also pins that unit so it can't keep shooting your fast units.</p></li>
+      <li><strong>Step 2 — Charge your second Carnivo-Rex into a different enemy unit.</strong>
+        <p>WHY: Two charges = two pinned, battered units. Spread them to lock down as much of the gunline as possible. The Rex are Fearless — they won't flinch.</p></li>
+      <li><strong>Step 3 — Charge the Ravenous Beasts into an enemy support/backfield unit (16" charge).</strong>
+        <p>WHY: Their 16" charge reaches past the front line. Hitting a gun crew or buff unit shuts off help to the main line.</p></li>
+      <li><strong>Step 4 — Rush or Charge the Soul-Snatchers toward the enemy artillery/heavy weapons.</strong>
+        <p>WHY: Rending claws chew artillery and tanks. Reach the guns if you can; if not, Rush 16" to be in their face next round. Killing artillery stops the shots that actually threaten you.</p></li>
+      <li><strong>Step 5 — Rush the Snatcher Lord toward the closest marker or an exposed support model (16").</strong>
+        <p>WHY: He's your runner — keep him heading where you'll need a body on a marker. A lone support model in reach dies to his 4 Rending attacks.</p></li>
+      <li><strong>Step 6 — Note which units charged/struck — they are now FATIGUED.</strong>
+        <p>WHY: After charging or striking back, a unit only hits on natural 6s in melee for the rest of THIS round. Don't expect a second melee from them; fatigue resets at the start of Round 3.</p></li>
+    </ol>
+  </section>
+
+  <section id="round3">
+    <h2>Round 3 — Grind and Set Up</h2>
+    <p>Goal: finish the dangerous support, keep tanks busy, start drifting bodies toward markers. Fatigue has reset — beasts hit normally again.</p>
+    <ol>
+      <li><strong>Step 1 — Finish the enemy artillery/support web with your Soul-Snatchers.</strong>
+        <p>WHY: Artillery and support (indirect guns, buffers) are what make a gunline dangerous. Kill them first, before they fire again.</p></li>
+      <li><strong>Step 2 — Keep your Carnivo-Rex in melee — re-charge a fresh unit or keep grinding.</strong>
+        <p>WHY: A Rex locked in melee can't be shot effectively and stops that enemy from shooting too. 13 AP1 attacks at full effect grind tanks and chew infantry — a roadblock they can't ignore.</p></li>
+      <li><strong>Step 3 — Peel the Ravenous Beasts toward the nearest marker if their fight is won.</strong>
+        <p>WHY: Fast and expendable enough to switch from fighting to scoring. Get a body within 3" of a marker now. This is NOT a kill game.</p></li>
+      <li><strong>Step 4 — Position the Snatcher Lord adjacent to (not yet on) a marker you'll hold.</strong>
+        <p>WHY: A lone hero on a marker gets sniped. Hover one move away, then step on at the last moment when there's no time for the enemy to react.</p></li>
+      <li><strong>Step 5 — Count markers; decide which 2–3 you can realistically hold for Round 4.</strong>
+        <p>WHY: You win by controlling the MOST markers at the end — not by tabling them. Aim every surviving unit at your reachable markers next turn.</p></li>
+    </ol>
+  </section>
+
+  <section id="round4">
+    <h2>Round 4 — Grab the Ground (STOP Fighting)</h2>
+    <p>Goal: scoring only. Most markers controlled when this round ends wins. Chasing a kill you don't need can lose you the game.</p>
+    <ol>
+      <li><strong>Step 1 — Move Soul-Snatchers ONTO an open marker (within 3", no enemy within 3").</strong>
+        <p>WHY: 5 models is a strong, hard-to-clear claim. Use Rush (16") for distance — you don't need to shoot, you need to stand on the ground.</p></li>
+      <li><strong>Step 2 — Move Ravenous Beasts and Snatcher Lord onto SEPARATE markers.</strong>
+        <p>WHY: Three markers with three units beats piling onto one. Each controlled marker is a point toward the win.</p></li>
+      <li><strong>Step 3 — If an enemy "no-rout" blob sits on a marker, move within 3" to CONTEST — don't try to kill it.</strong>
+        <p>WHY: HDF "Hold the Line" = they never run, so you can't clear them in one round. But control needs NO enemy within 3" — your model within 3" cancels their point. Contesting is faster and surer than killing.</p></li>
+      <li><strong>Step 4 — Use your Carnivo-Rex to body-block a marker or screen your scorers.</strong>
+        <p>WHY: A Rex within 3" of a marker contests it and is nearly impossible to shift; even when it can't "control" with an enemy near, it protects the smaller units that ARE scoring. Don't send it on a pointless kill hunt.</p></li>
+      <li><strong>Step 5 — Walk every marker: is one of MY models within 3" AND no enemy within 3"? Fix near-misses with your last activations.</strong>
+        <p>WHY: A model 3.5" away controls nothing. The game is decided by inches right now — nudge units fully on, contest theirs. Most markers = you win.</p></li>
+    </ol>
+  </section>
+
+  <section id="glossary">
+    <h2>Glossary — Plain Definitions</h2>
+    <dl>
+      <dt>Activation</dt><dd>Your turn to act with one unit. Players alternate one unit at a time until all units have acted that round.</dd>
+      <dt>Advance (Action)</dt><dd>Move up to 6" (Fast 8"), then you may shoot. The all-purpose "move and still attack" action.</dd>
+      <dt>Ambush</dt><dd>The unit starts off the table and arrives on a later round, placed over 9" from enemies.</dd>
+      <dt>AP(X)</dt><dd>Armor Piercing. Lowers the defender's save by X, so they must roll X higher to save.</dd>
+      <dt>Artillery</dt><dd>A heavy platform firing powerful, often long-range/Indirect shots. A priority kill — it stops the big hits.</dd>
+      <dt>Blast(X)</dt><dd>Area attack scoring up to X hits, but capped at the number of models in the target. Your single-model Carnivo-Rex caps any Blast to just 1 hit.</dd>
+      <dt>Caster</dt><dd>A hero who spends tokens to cast spells (buffs/damage). Treat enemy casters as support to shut down.</dd>
+      <dt>Charge (Action)</dt><dd>Move up to 12" (Fast 16") into base contact to start melee. The charger STRIKES FIRST.</dd>
+      <dt>Deadly(X)</dt><dd>Each wound that gets through deals X wounds. Brutal vs multi-wound (Tough) models.</dd>
+      <dt>Defense</dt><dd>The number a defender needs to roll (or higher) to save. AP lowers it. 6 always saves, 1 always fails. Lower Defense = better.</dd>
+      <dt>Fast</dt><dd>Moves farther: +2" Advance, +4" Rush/Charge. Your whole army is Fast (except the Rex).</dd>
+      <dt>Fatigue</dt><dd>After charging or striking back, a unit only hits on natural 6s in melee for the rest of that round. Resets next round.</dd>
+      <dt>Fear(X)</dt><dd>Counts as causing X extra wounds when deciding who won a melee.</dd>
+      <dt>Fearless</dt><dd>Much better at morale; rarely flinches. Your Carnivo-Rex have this.</dd>
+      <dt>Flying</dt><dd>Ignores terrain and models while moving, in a straight line over obstacles.</dd>
+      <dt>Hero</dt><dd>A single powerful model (your Snatcher Lord) that can lead a unit or score on its own.</dd>
+      <dt>Hive Bond (your army rule)</dt><dd>Your Alien Hives faction rule. <span class="note">Verify its exact effect in the Army Forge ⓘ tooltip before the game and play it as written.</span></dd>
+      <dt>Hold (Action)</dt><dd>Move 0" and shoot. For when you're already in position.</dd>
+      <dt>Hold the Line (enemy rule)</dt><dd>The HDF does NOT rout from morale. You can't scare them off — kill them or contest by standing within 3".</dd>
+      <dt>Indirect</dt><dd>Can fire at targets it can't see (lobs over cover/terrain). Often on Artillery.</dd>
+      <dt>Marker / Objective</dt><dd>A point you score by controlling: a model within 3" while no enemy is within 3". Most markers at end of Round 4 wins.</dd>
+      <dt>Quality</dt><dd>The number a model needs to roll (or higher) to hit. Q3 hits on 3+, Q4 on 4+. Also used for morale tests.</dd>
+      <dt>Regeneration</dt><dd>After failing a save, a second roll to ignore the wound (a "heal" save).</dd>
+      <dt>Relentless</dt><dd>When the unit Holds and shoots, 6s score an extra hit.</dd>
+      <dt>Reliable</dt><dd>Always hits on 2+ regardless of Quality.</dd>
+      <dt>Rending</dt><dd>Natural 6 to hit gains big AP (AP5) and ignores Regeneration. Your Soul-Snatchers and Lord have this — great vs tanks.</dd>
+      <dt>Rush (Action)</dt><dd>Move up to 12" (Fast 16"), no shooting. Fastest way to cross the table or dive onto a marker.</dd>
+      <dt>Scout</dt><dd>Deploys later and farther forward — a head start up the table.</dd>
+      <dt>Shaken</dt><dd>Result of failing morale: idle next activation, and can't hold or contest objectives until recovered.</dd>
+      <dt>Strider</dt><dd>Ignores difficult-terrain penalties — full speed through woods/rubble. Your whole army has this.</dd>
+      <dt>Tough(X)</dt><dd>Has X wounds; only dies after taking X total. Carnivo-Rex are Tough 12.</dd>
+    </dl>
+  </section>
+</div>
+
+<!-- ============ TAB 2: STRATEGY BY GOAL COMBO ============ -->
+<div id="strategy" class="tab">
+  <section id="goals-intro">
+    <h2>Pick Two Goals</h2>
+    <p class="provenance"><strong>About these goals — read me first.</strong> One Page Rules <em>Grimdark Future v3.5.1</em> ships <strong>six official missions</strong> (Duel, Seize Ground, Relic Hunt, Sabotage, Breakthrough, King&nbsp;of&nbsp;the&nbsp;Hill), all resolved by controlling objective markers over 4 rounds — a unit within 3&Prime; of a marker with no enemies within 3&Prime; seizes it, it stays seized after you leave, and a single enemy model within 3&Prime; contests it. The goals below are a <strong>hybrid</strong>: those marked <span class="tag-official">OFFICIAL</span> map directly onto OPR's published win conditions; those marked <span class="tag-strategic">STRATEGIC</span> are practical battlefield goals layered <em>on top of</em> the standard marker mission — how you choose to win it, not separate sanctioned scenarios. Select any two to see the combined game-plan for Monster Mash vs the HDF gunline.</p>
+    <ul class="goal-list">
+      <li><strong>Control the Most Markers</strong> <span class="tag-official">OFFICIAL</span><br><em>The default win: hold more markers than the HDF when round 4 ends.</em></li>
+      <li><strong>Hold the Center</strong> <span class="tag-official">OFFICIAL</span><br><em>King-of-the-Hill: dominate one central marker and refuse to be shifted off it.</em></li>
+      <li><strong>Break Into Enemy Ground</strong> <span class="tag-official">OFFICIAL</span><br><em>Breakthrough/Sabotage: push fast units deep to seize or destroy the marker the HDF camps in its backfield.</em></li>
+      <li><strong>Assassinate Key Units</strong> <span class="tag-strategic">STRATEGIC</span><br><em>Hunt the HDF's force-multipliers — artillery, AP-heavy gun teams, heroes/casters.</em></li>
+      <li><strong>Deny &amp; Contest</strong> <span class="tag-strategic">STRATEGIC</span><br><em>Use speed to put one model within 3&Prime; of enemy-held markers late, neutralizing their score.</em></li>
+      <li><strong>Survive &amp; Out-Point</strong> <span class="tag-strategic">STRATEGIC</span><br><em>Keep your low-model army alive — tank fire on the beasts, trade nothing free, win on objectives.</em></li>
+    </ul>
+  </section>
+
+  <div class="selector">
+    <div class="selrow">
+      <div><label>Goal 1</label><select id="g1"></select></div>
+      <div><label>Goal 2</label><select id="g2"></select></div>
+    </div>
+  </div>
+  <div id="stratOut"></div>
+</div>
+
+<!-- ============ TAB 3: MY ARMY ============ -->
+<div id="army" class="tab">
+  <section class='unit'>
+    <h2>Quick primer (read this first)</h2>
+    <p>Two numbers describe every model. <strong>Quality (Qua)</strong> is what you roll or beat on a d6 to hit — Qua 4 means "4, 5, or 6 hits." <strong>Defense (Def)</strong> is the number to save a hit; <strong>lower is better</strong> (Def 2 is a tank, Def 5 is squishy). Each turn a unit takes ONE action: <strong>Hold</strong> (stay, shoot), <strong>Advance</strong> (short move, shoot), <strong>Rush</strong> (far, no shoot), <strong>Charge</strong> (far, into melee). You're a melee army — mostly Rush then Charge.</p>
+    <p>You win by sitting on <strong>objective markers</strong>, not by killing everything. Neither side can make the other run away, so it's decided by who holds more markers at the end. Beasts soak the bullets; the fast units run the objectives.</p>
+  </section>
+
+  <section class='unit'>
+    <h2>Carnivo-Rex ×2 — 295 pts each</h2>
+    <div class="table-scroll"><table>
+      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
+      <tr><td>4+</td><td>2</td><td>12</td><td>Normal</td><td>3× Heavy Razor Claws (A3, AP1) + Stomp (A4, AP1) = <strong>13 melee attacks, all AP1</strong></td></tr>
+    </table></div>
+    <h3>What it does</h3>
+    <p>Your giant monster and the centerpiece. A <strong>single-model unit</strong> with <strong>Tough(12)</strong> (eats 12 wounds). <strong>Fearless</strong> = almost never flees. <strong>AP1</strong> subtracts 1 from enemy saves. Thirteen AP1 attacks on 4+ wipe a 10-model infantry squad in one charge.</p>
+    <p>The trick: because it's ONE model, enemy <strong>Blast</strong> weapons are wasted — Blast multiplies hits but is capped at the number of models in the target, so even a Blast(6) gun deals it <strong>1 hit</strong>. Their big template guns are useless here.</p>
+    <h3>How to use it</h3>
+    <ul>
+      <li><strong>Walk it straight up the middle</strong> (Rush, then Charge). Their anti-beast guns only chip ~2–3 of its 12 wounds/turn — it survives ~4 turns of focused fire.</li>
+      <li><strong>Charge the biggest infantry blob you can reach</strong> — 13 AP1 attacks delete a 10-model squad, removing a chunk of their shooting.</li>
+      <li><strong>Bait their best guns</strong> (Fusion Arrays AP4 Deadly3, Laser Cannons AP3 Deadly3) — let the Rex soak those so your fragile units stay untouched.</li>
+      <li><strong>Keep the two Rexes apart</strong> (different lanes) so their fire splits.</li>
+      <li><strong>Don't be shy about objectives</strong> — a Rex on a marker is nearly impossible to shift.</li>
+    </ul>
+    <p class="dont">Don't: hold it back out of fear (its job is to absorb fire in their faces), and don't clump both Rexes so one can be focused down before it arrives.</p>
+  </section>
+
+  <section class='unit'>
+    <h2>Soul-Snatchers — 160 pts</h2>
+    <div class="table-scroll"><table>
+      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
+      <tr><td>3+</td><td>4</td><td>1 each (5)</td><td><strong>Fast</strong> + Strider</td><td>Heavy Claws (A2, AP1, <strong>Rending</strong>) = 10 attacks on 3+</td></tr>
+    </table></div>
+    <h3>What it does</h3>
+    <p>Five fast, accurate bodies — your <strong>primary scorers</strong> and one reliable tank-killer. <strong>Fast</strong> (+2 Advance/+4 Rush&Charge), <strong>Strider</strong> (ignore difficult terrain). Hitting on 3+ they almost always connect; <strong>Rending</strong> makes any natural 6 an <strong>AP5</strong> hit that shreds even Defense-2 tanks.</p>
+    <h3>How to use it</h3>
+    <ul>
+      <li><strong>Race them to the markers</strong> turn one — Fast + Strider claims midfield before the Humans react.</li>
+      <li><strong>Send them after tanks</strong> — 10 attacks on 3+ make enough 6s (AP5) to grind a Def-2 vehicle.</li>
+      <li><strong>Use terrain</strong> — Strider means woods/ruins cost nothing; stay out of clean firing lines.</li>
+      <li><strong>Charge fragile shooters</strong> — Human infantry fold in melee; win the combat, then sit on the marker.</li>
+    </ul>
+    <p class="dont">Don't: burn them as a disposable speed-bump (too valuable as scorers + only reliable tank-hurter), and don't leave them in the open within obvious gun range (Tough 1 each).</p>
+  </section>
+
+  <section class='unit'>
+    <h2>Ravenous Beasts — 155 pts</h2>
+    <div class="table-scroll"><table>
+      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
+      <tr><td>4+</td><td>4</td><td>3 each (3)</td><td><strong>Fast</strong> + Strider</td><td>2× Razor Claws (A2) = 6 attacks, AP0</td></tr>
+    </table></div>
+    <h3>What it does</h3>
+    <p>Three tougher fast bodies — <strong>Tough(3)</strong> each, far harder to remove than Soul-Snatchers. Your second wave of <strong>fast melee + objective grabbers</strong>. AP0 attacks = best vs soft Def-5 infantry, not tanks. As a 3-model unit they cap incoming Blast at 3.</p>
+    <h3>How to use it</h3>
+    <ul>
+      <li><strong>Run them up a flank</strong> beside a Rex, using Fast to reach midfield objectives.</li>
+      <li><strong>Throw them at infantry, not armor</strong> — 6 AP0 attacks chew Humans but bounce off tanks.</li>
+      <li><strong>Use them as a durable objective anchor</strong> — Tough(3) is annoying for a low-AP gunline to clear.</li>
+      <li><strong>Let them screen the Soul-Snatchers</strong> by drawing fire (they survive hits better).</li>
+    </ul>
+    <p class="dont">Don't: send them after tanks (no Rending/AP — they achieve nothing), and don't blob all three onto one Rex in a clump.</p>
+  </section>
+
+  <section class='unit'>
+    <h2>Snatcher Lord — 85 pts</h2>
+    <div class="table-scroll"><table>
+      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
+      <tr><td>3+</td><td>4</td><td>3</td><td><strong>Fast</strong> + Strider</td><td>Heavy Claws (A4, AP1, <strong>Rending</strong>)</td></tr>
+    </table></div>
+    <h3>What it does</h3>
+    <p>A cheap, fast <strong>Hero</strong> — he can <strong>join a multi-model unit</strong> (Hero with Tough ≤6 may join). Hits on 3+ with 4 AP1 Rending attacks (every 6 = AP5). Fast + Strider make him a great late-game runner to sprint onto an undefended marker.</p>
+    <h3>How to use it</h3>
+    <ul>
+      <li><strong>Glue him to the Ravenous Beasts</strong> as a punchy leader (his Rending adds tank-threat + accuracy)…</li>
+      <li><strong>…or run him solo late</strong> to grab/contest an open objective.</li>
+      <li><strong>Use his speed to react</strong> — hold back, then Rush to wherever a marker is undefended on the final turns.</li>
+      <li><strong>Lean on Rending</strong> — point those 4 dice at something with a good save.</li>
+    </ul>
+    <p class="dont">Don't: park him alone in the open within sniper/clean-shot range — a single Tough(3) model worth picking off. When in doubt, tuck him in a unit so he can't be targeted alone.</p>
+  </section>
+
+  <section class='unit'>
+    <h2>Army rule &amp; synergy</h2>
+    <p><strong>Hive Bond</strong> is your shared army rule — <span class="note">verify its exact effect via the Army Forge ⓘ tooltip</span> before the game; the wording determines how your units support each other.</p>
+    <p><strong>Synergy in one line:</strong> the two Carnivo-Rex soak the gunline's fire and delete infantry up the middle, while the Fast Soul-Snatchers, Ravenous Beasts, and Snatcher Lord flank past the distracted Humans to grab and hold the markers that win the game.</p>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  Fan-made play aid • Grimdark Future is © One Page Rules • Verify <strong>Hive Bond</strong> &amp; <strong>Destructive</strong> tooltips in Army Forge • <strong>You win on markers, not kills.</strong>
+</footer>
+
+<script>
+// ---- Tab switching ----
+document.querySelectorAll('nav.tabs button').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('nav.tabs button').forEach(function(b){b.classList.remove('active')});
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+
+// ---- Strategy data ----
+const GOALS = [
+  "Control the Most Markers",
+  "Hold the Center",
+  "Break Into Enemy Ground",
+  "Assassinate Key Units",
+  "Deny & Contest",
+  "Survive & Out-Point"
+];
+
+const STRATEGIES = {
+  "Control the Most Markers|Control the Most Markers":
+    "This is the default win and Monster Mash is built for it: <strong>you win on markers, not kills</strong>. Treat your 2 Carnivo-Rex as mobile fire-magnets that walk up the center and dare the gunline to shoot them — each Rex caps any Blast weapon to a single hit, so the big guns barely scratch them while your scorers work. The <strong>Soul-Snatchers</strong> are your best objective unit; park them on the nearest 1-2 markers and let the Snatcher Lord and Ravenous Beasts grab a third. <ul><li>Spread across markers — your real weakness is only 5 units / 11 models.</li><li>Markers stay seized after you leave, so tag one early then push onward.</li><li>Round 4 is everything: a model within 3\" of every marker you intend to hold, and contest theirs.</li></ul>",
+  "Hold the Center|Hold the Center":
+    "King-of-the-Hill rewards immovability, and a Carnivo-Rex is the most immovable thing on the table. <strong>Plant one Rex (Tough12, Fearless) on the central marker</strong> — the HDF can't rout it (mostly AP0) and can't melee it off (Q5 A1 infantry evaporate to 13 AP1 attacks). Bring the second Rex and Ravenous Beasts alongside as a melee wall so anything trying to body the center gets charged. Use Soul-Snatchers and the Lord on the wings to stop flanking or late contests. The only threat is concentrated AP4/AP3 fire — angle the Rex behind terrain on approach for one cover-saved turn before you plant.",
+  "Break Into Enemy Ground|Break Into Enemy Ground":
+    "Breakthrough/Sabotage means getting bodies into the backfield, and you're faster than they are (all Fast Strider). <strong>Lead with Ravenous Beasts + Snatcher Lord</strong> on a flank, using a Rex on the same side as a moving wall that eats overwatch and Blast fire. Soul-Snatchers follow as the unit that seizes/destroys the deep marker (and can grind the Def-2 tanks parked back there). <ul><li>Pick the softest screen and commit — don't split your tiny activation count across both flanks.</li><li>Hold the Line means they won't flee — clear or out-position whatever sits on the objective.</li><li>For Sabotage, your speed reaches their marker turn 2-3 while a body stays home on yours.</li></ul>",
+  "Assassinate Key Units|Assassinate Key Units":
+    "The gunline only hurts you through a few units: <strong>artillery (indirect, ignores cover), the AP4 Fusion Array, AP3 Laser Cannons, and any hero/caster</strong>. Kill those and the remaining Q5-6 AP0 fire is nearly harmless to Tough12 beasts. Send <strong>Ravenous Beasts + Snatcher Lord</strong> (Fast, Rending) on a deep run at the artillery and gun teams — Def-2 vehicles or D5 infantry that fold to Rending. The Rex pair advances up the middle to force the HDF to keep shooting them instead of repositioning the guns. Don't over-invest: kill the 2-3 that matter, then pivot the killers onto markers.",
+  "Deny & Contest|Deny & Contest":
+    "Contesting is the great equalizer for a low-model army: <strong>one model within 3\" of an HDF-held marker neutralizes their control</strong> without killing the campers. This weaponizes your speed — the Snatcher Lord and Ravenous Beasts are perfect late-game contest pieces that dash 3\" into range on the final round. Hold your beasts central to pin the gunline, then in rounds 3-4 peel fast models onto the enemy's scoring markers. <ul><li>Shaken units can't contest — send healthy fast bodies.</li><li>Timing matters: contesting too early lets them shoot the lone model off; do it on the last activation possible.</li></ul>",
+  "Survive & Out-Point|Survive & Out-Point":
+    "With only 11 models, every loss is a lost activation and a lost scorer — survival is itself a strategy vs an attrition gunline. <strong>Lean on the Rex Blast-cap and Tough12 to soak the entire shooting phase</strong>; they tank fire for 4+ turns, which is the whole game. Keep Soul-Snatchers, Ravenous Beasts and the Lord in cover or behind the beasts until you need them to score, denying easy AP0 kills. Win by sitting on markers and refusing bad trades — you don't need to table them (Hold-the-Line means you can't). Watch only indirect artillery (ignores cover) and AP3/AP4 guns; keep models out of those lanes.",
+  "Control the Most Markers|Hold the Center":
+    "Make the center the anchor of a wider marker game. <strong>One Carnivo-Rex plants on the central/most-contested marker</strong> as an unkillable hold piece while the second Rex roams as a fire-magnet. Soul-Snatchers and the Snatcher Lord fan out to claim outer markers, and Ravenous Beasts swing to whichever flank the HDF leaves soft. The center Rex pins the gunline's attention, freeing your fast scorers to out-spread the HDF. End-state: own the middle outright and contest enough of the rest to win the count at round 4.",
+  "Control the Most Markers|Break Into Enemy Ground":
+    "A full-table land-grab that stretches the static gunline past breaking. Hold your near/central markers with a Rex + Soul-Snatchers, then <strong>send Ravenous Beasts and the Snatcher Lord deep to seize the backfield marker</strong>, with the second Rex shadowing them to absorb overwatch and Blast. They can't rout (Hold the Line) but can't move and shoot well either, so forcing them to defend their deployment splits their firepower. Risk is your low model count: only commit a sustainable push, and tag the near markers first (they stay seized) before breaking in.",
+  "Control the Most Markers|Assassinate Key Units":
+    "Score broadly while surgically removing the guns that could contest the count. <strong>Soul-Snatchers + Snatcher Lord camp and grab markers</strong>; the Ravenous Beasts run the flank to kill artillery and the AP3/AP4 weapons that threaten your beasts. The two Rex sit center as both bodyguards and bait that keeps HDF guns firing uselessly into Tough12. Kill order: indirect artillery first (only thing that ignores cover and reaches your scorers), then Fusion/Laser teams. Once gone, the AP0 gunline can't shift you — the marker count is yours.",
+  "Control the Most Markers|Deny & Contest":
+    "The purest expression of how this army beats a gunline: <strong>seize what you can, contest the rest.</strong> Use Soul-Snatchers and a Rex to genuinely hold 1-2 markers, then treat the Snatcher Lord and Ravenous Beasts as late-game contest darts that dash within 3\" of every HDF-held marker on rounds 3-4. With 11 models you may not out-seize them — but a contested enemy marker scores nobody, so your held markers win the differential. Keep contest models away from HDF guns until the final activations, and never send a Shaken model.",
+  "Control the Most Markers|Survive & Out-Point":
+    "Grind it out: hold markers and refuse to die. <strong>Both Carnivo-Rex form a central wall that soaks the entire shooting phase</strong> (Blast-cap + Tough12 = 4 turns of tanking), while Soul-Snatchers, Ravenous Beasts and the Lord score from cover and behind the beasts. Don't chase kills or take exposed trades — each of your 11 models is a scorer you can't replace. Win the round-4 count by simply still being on more markers than they are. Only fear indirect artillery and AP3/AP4 fire.",
+  "Hold the Center|Break Into Enemy Ground":
+    "A two-pronged squeeze: own the middle and stab the back. <strong>One Rex anchors the center marker</strong> (unkillable, pins the gunline), while Ravenous Beasts + Snatcher Lord + the second Rex drive into the HDF deployment for the rear objective. This forces a slow static gunline to fight in two directions at once. Soul-Snatchers are the flexible hinge, reinforcing whichever prong the enemy commits against. The center hold guarantees a baseline score even if the breakthrough stalls under Fusion/Laser fire.",
+  "Hold the Center|Assassinate Key Units":
+    "Dominate the middle, then decapitate. <strong>A Carnivo-Rex plants on the center</strong> and becomes the problem the HDF must keep shooting, while Ravenous Beasts and the Snatcher Lord peel off to murder the artillery and AP-heavy teams — the only units that could eventually crack your center Rex. The second Rex backs the hold or escorts the assassins through overwatch. Once the dangerous guns die, AP0 shooting can't pry your Rex off the hill. Prioritize indirect artillery — the one weapon that hits your holder regardless of cover.",
+  "Hold the Center|Deny & Contest":
+    "Own one marker absolutely, deny them theirs. <strong>The center Rex is uncontestable for the HDF</strong> — they can't kill it or melee it off — so your point is locked. Spend the rest of the army as denial pieces: Snatcher Lord and Ravenous Beasts dash within 3\" of every HDF-held marker late, neutralizing their score so your dominated center wins the differential. Soul-Snatchers hold a second marker or join the contest swarm. Thrives when you're out-modeled: hold ONE thing absolutely and spoil everything else.",
+  "Hold the Center|Survive & Out-Point":
+    "The bunker strategy. <strong>Plant a Rex on the center and build the army around it as a survivable fortress</strong> — second Rex and Ravenous Beasts as a melee shell, fragile scorers tucked in cover behind. They can't rout you and AP0 bounces off Tough12, so you outlast them while sitting on the one marker that matters. Refuse every bad trade; with 11 models, attrition is your only real enemy. Center point + survival to round 4 quietly out-scores a gunline that killed nothing important.",
+  "Break Into Enemy Ground|Assassinate Key Units":
+    "Your fast units do both jobs on one trip. <strong>Send Ravenous Beasts + Snatcher Lord deep on a single flank</strong>: first target the backfield artillery and AP3/AP4 gun teams (Def-2 vehicles fold to Rending), and once dead they're already in position to seize the rear marker. A Carnivo-Rex escorts them in to soak overwatch and Blast; the second Rex + Soul-Snatchers hold home so the breakthrough doesn't cost the count. Highest-tempo plan in the matchup — removes their only beast-killers AND takes ground in one push. Commit to ONE flank.",
+  "Break Into Enemy Ground|Deny & Contest":
+    "Push deep, then spoil. The break-in puts your fast models in the backfield — exactly where their scoring markers sit — so <strong>convert the breakthrough into mass contesting</strong>. Ravenous Beasts and the Snatcher Lord dash within 3\" of the enemy's home objectives, neutralizing them without wiping the campers (who won't rout anyway). The Rex pair holds center and home so a contested-everywhere board still leaves YOU ahead on uncontested markers. Time the contest for the last activations so the deep models aren't shot off first.",
+  "Break Into Enemy Ground|Survive & Out-Point":
+    "Break in cheaply and keep everyone alive. <strong>Use a Carnivo-Rex as the spearhead</strong> so the breakthrough is led by the one model they can't efficiently kill — it tanks backfield overwatch while Soul-Snatchers or the Lord trail to seize the deep marker. The second Rex and remaining bodies hold home from cover. Discipline = patience: you only need the deep marker plus your survivors at round 4, so don't expose fragile models until the seize is safe. They can't table you and can't rout — out-positioning beats out-fighting.",
+  "Assassinate Key Units|Deny & Contest":
+    "Kill what's deadly, contest what's scored. <strong>Ravenous Beasts and the Snatcher Lord flank in to assassinate artillery and AP-heavy teams</strong> — and because those guns sit near the HDF's markers, the same models pivot straight into contesting those objectives afterward. Removing the AP3/AP4/indirect guns also makes your beasts untouchable, freeing them to threaten more contests. The two Rex hold center as the anchor. Net: the gunline can neither hurt your beasts nor score its markers — a soft-lock you win at round 4.",
+  "Assassinate Key Units|Survive & Out-Point":
+    "Defensive attrition with a scalpel. <strong>Outlast the HDF while killing only the units that threaten that survival</strong> — indirect artillery (ignores cover) and the AP3/AP4 guns that hurt your beasts. Carnivo-Rex tank the gunline; Ravenous Beasts + Snatcher Lord make targeted assassination runs then retreat to cover or markers rather than overextending. Once the dangerous guns die, your 11 models are nearly unkillable to AP0 fire and you sit on objectives to round 4. Never trade a beast or Snatcher unit for a low-value HDF body.",
+  "Deny & Contest|Survive & Out-Point":
+    "The ultimate low-model spoiler game. <strong>Keep all 11 models alive — beasts soaking fire, fragile units in cover — and win purely on the marker differential</strong> by contesting more than you hold. Carnivo-Rex anchor 1-2 real markers and pin the HDF; the Snatcher Lord and Ravenous Beasts survive untouched until rounds 3-4, then dart within 3\" of every enemy-held marker to zero out their score. They can't rout and AP0 can't kill your beasts, so it's a math problem: your few seized markers beat their fully-contested ones. Send only healthy models to contest, on the last possible activation."
+};
+
+function keyFor(a,b){
+  var ia=GOALS.indexOf(a), ib=GOALS.indexOf(b);
+  var lo=Math.min(ia,ib), hi=Math.max(ia,ib);
+  return GOALS[lo]+"|"+GOALS[hi];
+}
+function renderStrat(){
+  var a=document.getElementById('g1').value, b=document.getElementById('g2').value;
+  var k=keyFor(a,b);
+  var txt=STRATEGIES[k]||"No strategy found for that combination.";
+  var label=(a===b)?("Goal: "+a):(a+"  +  "+b);
+  document.getElementById('stratOut').innerHTML='<div class="combo">'+label+'</div>'+txt;
+}
+(function(){
+  var g1=document.getElementById('g1'), g2=document.getElementById('g2');
+  GOALS.forEach(function(g,i){
+    var o1=document.createElement('option');o1.value=g;o1.textContent=g;g1.appendChild(o1);
+    var o2=document.createElement('option');o2.value=g;o2.textContent=g;g2.appendChild(o2);
+  });
+  g1.selectedIndex=0; g2.selectedIndex=4; // sensible default combo
+  g1.addEventListener('change',renderStrat);
+  g2.addEventListener('change',renderStrat);
+  renderStrat();
+})();
+</script>
+</body>
+</html>
