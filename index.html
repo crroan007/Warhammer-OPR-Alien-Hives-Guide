@@ -41,6 +41,19 @@
   .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
   th{background:var(--panel2);color:var(--acc2)}
+  .opr-card{background:#0e1712;border:1px solid var(--acc);border-radius:10px;padding:10px 12px;margin:10px 0}
+  .opr-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding-bottom:7px}
+  .opr-name{font-weight:800;color:var(--acc);font-size:16px}
+  .opr-size{color:var(--muted);font-weight:700;font-size:13px}
+  .opr-q,.opr-d{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-weight:800;font-size:13px}
+  .opr-pts{margin-left:auto;color:var(--acc2);font-weight:800;font-size:13px}
+  .opr-rules{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+  .rule{font-size:11px;font-weight:700;background:#14271c;border:1px solid var(--line);color:var(--acc2);padding:2px 8px;border-radius:999px}
+  .opr-weap{width:100%;border-collapse:collapse;font-size:13px;margin-top:2px}
+  .opr-weap th{font-size:10px;text-transform:uppercase;letter-spacing:.4px;padding:4px 6px}
+  .opr-weap td{border:1px solid var(--line);padding:5px 6px}
+  .opr-weap td:first-child{font-weight:600;color:#f4fbf2}
+  .opr-tot{margin:7px 0 0;font-size:12px;color:var(--muted);font-style:italic}
   dl{margin:4px 0}
   dt{font-weight:700;color:var(--acc2);margin-top:10px}
   dd{margin:2px 0 0;color:var(--muted);font-size:14px}
@@ -243,10 +256,16 @@
 
   <section class='unit'>
     <h2>Carnivo-Rex ×2 — 295 pts each</h2>
-    <div class="table-scroll"><table>
-      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
-      <tr><td>4+</td><td>2</td><td>12</td><td>Normal</td><td>3× Heavy Razor Claws (A3, AP1) + Stomp (A4, AP1) = <strong>13 melee attacks, all AP1</strong></td></tr>
-    </table></div>
+    <div class="opr-card">
+      <div class="opr-head"><span class="opr-name">Carnivo-Rex</span><span class="opr-size">[1]</span><span class="opr-q">Q4+</span><span class="opr-d">D2+</span><span class="opr-pts">295 pts</span></div>
+      <div class="opr-rules"><span class="rule">Fearless</span><span class="rule">Tough(12)</span><span class="rule">Hive Bond*</span></div>
+      <div class="table-scroll"><table class="opr-weap">
+        <tr><th>Weapon</th><th>Rng</th><th>A</th><th>AP / Special</th></tr>
+        <tr><td>3× Heavy Razor Claws</td><td>melee</td><td>A3</td><td>AP(1)</td></tr>
+        <tr><td>Stomp</td><td>melee</td><td>A4</td><td>AP(1)</td></tr>
+      </table></div>
+      <p class="opr-tot">= 13 melee attacks, all AP(1) — wipes a 10-model squad in one charge</p>
+    </div>
     <h3>What it does</h3>
     <p>Your giant monster and the centerpiece. A <strong>single-model unit</strong> with <strong>Tough(12)</strong> (eats 12 wounds). <strong>Fearless</strong> = almost never flees. <strong>AP1</strong> subtracts 1 from enemy saves. Thirteen AP1 attacks on 4+ wipe a 10-model infantry squad in one charge.</p>
     <p>The trick: because it's ONE model, enemy <strong>Blast</strong> weapons are wasted — Blast multiplies hits but is capped at the number of models in the target, so even a Blast(6) gun deals it <strong>1 hit</strong>. Their big template guns are useless here.</p>
@@ -263,10 +282,15 @@
 
   <section class='unit'>
     <h2>Soul-Snatchers — 160 pts</h2>
-    <div class="table-scroll"><table>
-      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
-      <tr><td>3+</td><td>4</td><td>1 each (5)</td><td><strong>Fast</strong> + Strider</td><td>Heavy Claws (A2, AP1, <strong>Rending</strong>) = 10 attacks on 3+</td></tr>
-    </table></div>
+    <div class="opr-card">
+      <div class="opr-head"><span class="opr-name">Soul-Snatchers</span><span class="opr-size">[5]</span><span class="opr-q">Q3+</span><span class="opr-d">D4+</span><span class="opr-pts">160 pts</span></div>
+      <div class="opr-rules"><span class="rule">Fast</span><span class="rule">Strider</span><span class="rule">Hive Bond*</span></div>
+      <div class="table-scroll"><table class="opr-weap">
+        <tr><th>Weapon</th><th>Rng</th><th>A</th><th>AP / Special</th></tr>
+        <tr><td>5× Heavy Claws</td><td>melee</td><td>A2</td><td>AP(1), Rending</td></tr>
+      </table></div>
+      <p class="opr-tot">= 10 attacks on 3+; Rending 6s become AP(5) to grind tanks</p>
+    </div>
     <h3>What it does</h3>
     <p>Five fast, accurate bodies — your <strong>primary scorers</strong> and one reliable tank-killer. <strong>Fast</strong> (+2 Advance/+4 Rush&Charge), <strong>Strider</strong> (ignore difficult terrain). Hitting on 3+ they almost always connect; <strong>Rending</strong> makes any natural 6 an <strong>AP5</strong> hit that shreds even Defense-2 tanks.</p>
     <h3>How to use it</h3>
@@ -281,10 +305,15 @@
 
   <section class='unit'>
     <h2>Ravenous Beasts — 155 pts</h2>
-    <div class="table-scroll"><table>
-      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
-      <tr><td>4+</td><td>4</td><td>3 each (3)</td><td><strong>Fast</strong> + Strider</td><td>2× Razor Claws (A2) = 6 attacks, AP0</td></tr>
-    </table></div>
+    <div class="opr-card">
+      <div class="opr-head"><span class="opr-name">Ravenous Beasts</span><span class="opr-size">[3]</span><span class="opr-q">Q4+</span><span class="opr-d">D4+</span><span class="opr-pts">155 pts</span></div>
+      <div class="opr-rules"><span class="rule">Tough(3)</span><span class="rule">Fast</span><span class="rule">Strider</span><span class="rule">Hive Bond*</span></div>
+      <div class="table-scroll"><table class="opr-weap">
+        <tr><th>Weapon</th><th>Rng</th><th>A</th><th>AP / Special</th></tr>
+        <tr><td>2× Razor Claws</td><td>melee</td><td>A2</td><td>&mdash;</td></tr>
+      </table></div>
+      <p class="opr-tot">= 6 attacks, AP0 — great vs infantry, useless vs tanks</p>
+    </div>
     <h3>What it does</h3>
     <p>Three tougher fast bodies — <strong>Tough(3)</strong> each, far harder to remove than Soul-Snatchers. Your second wave of <strong>fast melee + objective grabbers</strong>. AP0 attacks = best vs soft Def-5 infantry, not tanks. As a 3-model unit they cap incoming Blast at 3.</p>
     <h3>How to use it</h3>
@@ -299,10 +328,15 @@
 
   <section class='unit'>
     <h2>Snatcher Lord — 85 pts</h2>
-    <div class="table-scroll"><table>
-      <tr><th>Qua</th><th>Def</th><th>Tough</th><th>Move</th><th>Key weapons</th></tr>
-      <tr><td>3+</td><td>4</td><td>3</td><td><strong>Fast</strong> + Strider</td><td>Heavy Claws (A4, AP1, <strong>Rending</strong>)</td></tr>
-    </table></div>
+    <div class="opr-card">
+      <div class="opr-head"><span class="opr-name">Snatcher Lord</span><span class="opr-size">[1]</span><span class="opr-q">Q3+</span><span class="opr-d">D4+</span><span class="opr-pts">85 pts</span></div>
+      <div class="opr-rules"><span class="rule">Hero</span><span class="rule">Tough(3)</span><span class="rule">Fast</span><span class="rule">Strider</span><span class="rule">Hive Bond*</span></div>
+      <div class="table-scroll"><table class="opr-weap">
+        <tr><th>Weapon</th><th>Rng</th><th>A</th><th>AP / Special</th></tr>
+        <tr><td>Heavy Claws</td><td>melee</td><td>A4</td><td>AP(1), Rending</td></tr>
+      </table></div>
+      <p class="opr-tot">* Hive Bond — verify exact effect in the Army Forge ⓘ tooltip</p>
+    </div>
     <h3>What it does</h3>
     <p>A cheap, fast <strong>Hero</strong> — he can <strong>join a multi-model unit</strong> (Hero with Tough ≤6 may join). Hits on 3+ with 4 AP1 Rending attacks (every 6 = AP5). Fast + Strider make him a great late-game runner to sprint onto an undefended marker.</p>
     <h3>How to use it</h3>
