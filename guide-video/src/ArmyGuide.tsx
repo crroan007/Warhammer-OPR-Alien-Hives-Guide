@@ -89,9 +89,9 @@ const UNITS: Unit[] = [
     tagColor: C.warn,
     dice: "MELEE: roll 14 dice @ 4+  (9 claws + 5 stomp)",
     use: [
-      'Keep in reserve. Round 2, drop it 9"+ from enemies near his best gun',
-      "Charge next turn — cripples a gun team and pins it so it can't shoot",
-      "You alternate placing reserves — this denies his ambush free rein",
+      "Keep in reserve. Round 2, drop behind his lines by his best gun or fast unit",
+      "Charge it — kill what could reach and reclaim your markers",
+      "You alternate placing reserves — denies his ambush free rein",
     ],
     avoid: [
       "Won't wipe a team — it kills about 1–2 of 3 models",
@@ -107,9 +107,9 @@ const UNITS: Unit[] = [
     tagColor: C.acc,
     dice: "MELEE: roll 10 dice @ 3+, Rending  (5 models × 2)",
     use: [
-      'Fast — 16" Rush. Hunt his transports and pop them before the cargo exits',
+      'Fast — 16" Rush. Tag a marker, then peel off and kill — don\'t camp',
+      "Hunt his transports and pop them before the cargo climbs out",
       "Rending 6s become high-AP — grind the Defense-2 tanks monsters can't reach",
-      "Round 4: flood and hold markers",
     ],
     avoid: [
       'Don\'t push 9"+ ahead of a monster — D4 / 5 wounds, they melt to one shot',
@@ -126,8 +126,8 @@ const UNITS: Unit[] = [
     dice: "SHOOT: roll 2 dice @ 4+ (5+ if it moved)  ·  Blast(3), Indirect",
     use: [
       "Park it in the backfield and NEVER move it",
-      "Lob Blast3 at his densest mob — no line of sight needed, ignores cover",
-      "Your best answer to a massed Ork swarm",
+      "Gun down anything creeping toward your seized markers — no line of sight needed",
+      "Blast3 is also your answer to a massed Ork swarm",
     ],
     avoid: [
       "Don't move it — −1 to hit halves its output",
@@ -139,12 +139,12 @@ const UNITS: Unit[] = [
     count: "[1]",
     q: "3+",
     d: "4+",
-    tag: "HOME GUARD · HERO",
+    tag: "FAST FLANKER · HERO",
     tagColor: C.warn,
     dice: "MELEE: roll 4 dice @ 3+, Rending",
     use: [
-      'Camp your home marker to deny his ambush a legal 9"+ landing zone',
-      'Late game: dart within 3" of a marker to contest it (cancels his control)',
+      "Send him wide to tag a far marker early — control sticks, it stays yours",
+      "Then hunt his backfield units that could circle back to reclaim it",
     ],
     avoid: [
       "Keep him behind a beast vs snipers — Takedown one-shots a Tough(3) hero",
@@ -341,15 +341,13 @@ const BigIdeaScene: React.FC<{ dur: number }> = ({ dur }) => (
           lineHeight: 1.4,
         }}
       >
-        Scoring is the <b style={{ color: C.ink }}>final snapshot</b> — most markers at the{" "}
-        <b style={{ color: C.ink }}>end of Round 4</b> wins. So{" "}
-        <b style={{ color: C.acc }}>grind his army for 3 rounds, then flood the markers.</b>
+        Tag a marker and it's <b style={{ color: C.ink }}>yours — even after you leave</b>, until he touches it. Both on one = only a <b style={{ color: C.ink }}>tie</b>. So <b style={{ color: C.acc }}>seize early, then drive in and kill.</b>
       </div>
     </Rise>
     <div style={{ display: "flex", gap: 26, marginTop: 46, width: "100%", maxWidth: 1500 }}>
-      <Pillar delay={20} icon="🦖" head="Beasts soak" sub="Single-model monsters cap any Blast at 1 hit and tank his guns." />
-      <Pillar delay={30} icon="🏃" head="Fast units score" sub="Soul-Snatchers & co. flood and contest the objective markers." />
-      <Pillar delay={40} icon="🎯" head="Win the count" sub="Most markers at the end of Round 4. Kills don't score — ground does." />
+      <Pillar delay={20} icon="🚩" head="Seize early" sub="Tag markers turn 1 — control sticks; they stay yours after you leave." />
+      <Pillar delay={30} icon="🦖" head="Then go kill" sub="Drive the monsters into his army. A dead unit can't take your ground back." />
+      <Pillar delay={40} icon="🎯" head="Own, don't tie" sub="Clear enemies off a marker to own it. A shared marker scores nobody." />
     </div>
   </Wrap>
 );
@@ -536,10 +534,10 @@ const StrategyScene: React.FC<{ dur: number }> = ({ dur }) => (
         THE GAME PLAN
       </div>
     </Rise>
-    <Round delay={10} n="R1–2" head="CROSS & SOAK" body="Beasts advance up the middle and eat his fire. Mortar Beast lobs at his densest mob." color={C.acc2} />
-    <Round delay={22} n="R2–3" head="GRIND HIM DOWN" body="Burrower drops on his best gun. Soul-Snatchers pop transports. Monsters crush what they reach." color={C.acc} />
-    <Round delay={34} n="R4" head="FLOOD THE MARKERS" body="Every survivor onto or within 3″ of a marker. Contest his — one model cancels his control." color={C.warn} />
-    <Round delay={46} n="WIN" head="MOST MARKERS = VICTORY" body="You don't need to table him. Hold the ground when Round 4 ends." color={C.danger} />
+    <Round delay={10} n="R1" head="TAG THE MARKERS" body="Rush out and seize the nearest markers — they stay yours after you leave." color={C.acc2} />
+    <Round delay={22} n="R2–3" head="KILL EVERYTHING" body="Drive the monsters into his army — destroy anything that could reach and reclaim your markers." color={C.acc} />
+    <Round delay={34} n="R4" head="OWN OUTRIGHT" body="Clear every enemy off the markers you want. Don't settle for a contested tie." color={C.warn} />
+    <Round delay={46} n="WIN" head="MOST MARKERS = VICTORY" body="Kill him off the ground and own the count when Round 4 ends." color={C.danger} />
   </Wrap>
 );
 
