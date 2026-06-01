@@ -5,6 +5,12 @@
 guide-video/node_modules/
 guide-video/out/
 guide-video/.remotion/
+guide-video/.env
+guide-video/public/voiceover/
+
+# Secrets
+*.env
+.env
 
 # OS / editor cruft
 Thumbs.db
