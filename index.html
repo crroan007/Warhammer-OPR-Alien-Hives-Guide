@@ -127,6 +127,27 @@
   .oprc-play ul,.oprc-avoid ul{margin:6px 0 0;padding-left:18px}
   .oprc-play li,.oprc-avoid li{margin:4px 0;color:var(--muted)}
   .oprc-play li b,.oprc-avoid li b{color:var(--ink)}
+  /* ===== Solo/Co-Op voice tab (.vox-*) ===== */
+  .vox-panel{background:linear-gradient(180deg,#15241b,#101813);border:1px solid var(--acc);border-radius:14px;padding:16px;margin:6px 0 16px;text-align:center}
+  .vox-mic{appearance:none;-webkit-appearance:none;border:0;cursor:pointer;width:96px;height:96px;border-radius:50%;background:var(--acc);color:#06120e;font-size:34px;line-height:1;box-shadow:0 6px 18px rgba(126,200,80,.35);transition:transform .08s,background .15s}
+  .vox-mic:active{transform:scale(.94)}
+  .vox-mic:disabled{cursor:default}
+  .vox-mic.listening{background:var(--danger);color:#fff;animation:voxpulse 1s ease-in-out infinite}
+  @keyframes voxpulse{0%,100%{box-shadow:0 0 0 0 rgba(228,103,91,.55)}50%{box-shadow:0 0 0 16px rgba(228,103,91,0)}}
+  .vox-hint{font-size:13px;color:var(--muted);margin:11px 0 0}
+  .vox-status{font-size:12px;font-weight:700;color:var(--acc2);margin:8px 0 0;min-height:15px}
+  .vox-heard{font-size:14px;color:var(--ink);font-style:italic;margin:7px 0 0;min-height:18px}
+  .vox-ans{text-align:left;background:var(--panel);border:1px solid var(--acc2);border-radius:10px;padding:12px 14px;margin:12px 0 0;font-size:15px;line-height:1.5}
+  .vox-ans:empty{display:none}
+  .vox-ex{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:13px 0 0}
+  .vox-ex button{appearance:none;-webkit-appearance:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--acc);background:#13201a;border:1px solid var(--line);padding:7px 11px;border-radius:999px}
+  .vox-ex button:active{background:var(--panel2)}
+  .vox-unsupported{font-size:13px;color:var(--warn);margin:11px 0 0}
+  .solo-tree{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin:12px 0}
+  .solo-tree h3{margin-top:2px}
+  .solo-tree ol{margin:6px 0 0}
+  .solo-tree.homebrew{border-color:var(--warn)}
+  .solo-tree.homebrew h3{color:var(--warn)}
 </style>
 </head>
 <body>
@@ -142,6 +163,7 @@
   <button data-tab="army">My Army</button>
   <button data-tab="cards">Cards</button>
   <button data-tab="video">Video</button>
+  <button data-tab="solo">Solo AI</button>
 </nav>
 
 <main>
@@ -552,6 +574,115 @@
   </section>
 </div>
 
+<!-- ============ TAB 6: SOLO / CO-OP (voice) ============ -->
+<div id="solo" class="tab">
+  <div class="chips">
+    <a href="#vox">Voice Coach</a><a href="#solo-setup">Setup</a><a href="#solo-trees">Decision Trees</a>
+    <a href="#solo-target">Targeting</a><a href="#solo-special">Special Rules</a>
+  </div>
+
+  <section id="vox" class="unit">
+    <h2>🎙️ Solo / Co-Op Voice Coach</h2>
+    <p style="color:var(--muted);font-size:14px;margin-top:0">Hands full of dice? Tap the mic and ask. It runs OPR's <strong>Solo &amp; Co-Op</strong> AI rules (v3.5) entirely on your device — no internet call, no account, nothing typed. Whatever it says is also printed below, and every question is a tappable button too.</p>
+    <div class="vox-panel">
+      <button id="voxMic" class="vox-mic" aria-label="Tap to talk">🎤</button>
+      <p class="vox-hint">Tap, ask, done — e.g. <em>“hybrid unit”</em>, <em>“how does it pick targets”</em>, or <em>“roll activation”</em></p>
+      <p id="voxStatus" class="vox-status"></p>
+      <p id="voxHeard" class="vox-heard"></p>
+      <div id="voxAns" class="vox-ans"></div>
+      <div class="vox-ex">
+        <button data-q="what does a shooting unit do">Shooting unit</button>
+        <button data-q="hybrid unit">Hybrid unit</button>
+        <button data-q="melee unit">Melee unit</button>
+        <button data-q="how does the ai pick targets">Targeting</button>
+        <button data-q="roll activation">Roll activation</button>
+        <button data-q="challenge bonus">Challenge bonus</button>
+        <button data-q="caster spells">Casters</button>
+        <button data-q="terrain rules">Terrain</button>
+        <button data-q="deployment">Deployment</button>
+        <button data-q="classify units">Unit types</button>
+        <button data-q="what can you do">Help</button>
+      </div>
+      <p id="voxUnsupported" class="vox-unsupported" style="display:none"></p>
+    </div>
+  </section>
+
+  <section id="solo-setup" class="unit">
+    <h2>What this is</h2>
+    <p>OPR ships free <strong>Solo &amp; Co-Op Rules</strong> that run an enemy army with a simple paper-and-dice “AI”, so you (or you + friends) play standard Grimdark Future <em>against the game itself</em>. You still play GF normally — these rules only decide what the unowned army does. <span class="note">v3.5 is current; a v3.6 closed beta is running (May 2026), so expect tweaks.</span></p>
+    <h3>Setup</h3>
+    <ul>
+      <li><strong>Build 3–6 balanced lists</strong>, then randomly assign which the AI runs — so you don't know exactly what you'll face.</li>
+      <li><strong>Classify every AI unit</strong> (this picks its tree): <strong>Melee</strong> = no ranged weapons · <strong>Shooting</strong> = ranged better than melee · <strong>Hybrid</strong> = melee better than ranged.</li>
+      <li><strong>Deploy the AI:</strong> split its units into 3 equal groups; divide its table edge into 3 sections; roll a D3 per group for its section; place units one at a time as close as possible to the nearest objective, outside difficult/dangerous terrain.</li>
+    </ul>
+    <h3>Each AI activation</h3>
+    <p>Roll a <strong>D3 for the section</strong> (1–3). If that section has no eligible units, go <strong>clockwise</strong> to the next that does. Then roll for a <strong>random unit</strong> there and run its decision tree. <em>(Shaken units activate last and just recover; Counter units activate after their section's others.)</em></p>
+  </section>
+
+  <section id="solo-trees" class="unit">
+    <h2>AI Decision Trees</h2>
+    <p style="color:var(--muted);font-size:14px;margin-top:0">All three are objective-greedy first. From Solo &amp; Co-Op v3.5.</p>
+
+    <div class="solo-tree">
+      <h3>Shooting unit</h3>
+      <ol>
+        <li><strong>Objective you don't control?</strong> → Advance toward it and shoot if that keeps an enemy in range; otherwise <strong>Rush</strong> to it.</li>
+        <li><strong>No free objective?</strong> → Advance toward the nearest enemy and shoot if you'll be in range; otherwise <strong>Rush</strong> at them.</li>
+      </ol>
+      <p style="color:var(--muted);font-size:13px;margin:6px 0 0">Always tries to stay at <strong>maximum range</strong> from enemies.</p>
+    </div>
+
+    <div class="solo-tree">
+      <h3>Hybrid unit</h3>
+      <ol>
+        <li><strong>Free objective + enemy in the way?</strong> → Charge it if able; else Advance to the objective and shoot; else Rush to it.</li>
+        <li><strong>Free objective only in Rush range?</strong> → Rush to it.</li>
+        <li><strong>Free objective, none in the way?</strong> → Advance + shoot if it keeps an enemy in range; else Rush.</li>
+        <li><strong>No free objective?</strong> → Charge an enemy in charge range; else Advance + shoot the nearest enemy; else Rush at them.</li>
+      </ol>
+    </div>
+
+    <div class="solo-tree">
+      <h3>Melee unit</h3>
+      <ol>
+        <li><strong>Free objective?</strong> → Charge any enemy in the way if able; otherwise Rush to the objective.</li>
+        <li><strong>No free objective?</strong> → Charge an enemy in charge range; otherwise Rush at the nearest enemy.</li>
+      </ol>
+    </div>
+    <p style="color:var(--muted);font-size:13px">“In the way” = within 6" of the straight path to the objective. The AI controls an objective if it holds it, or has more non-Shaken units than you within 3".</p>
+  </section>
+
+  <section id="solo-target" class="unit">
+    <h2>Targeting Priority</h2>
+    <p><strong>Base rule:</strong> shoot/charge the <strong>nearest valid target</strong>, preferring units that <strong>haven't activated yet</strong>, and a target <strong>in the open over one in cover</strong>. Always strikes back when charged.</p>
+    <div class="table-scroll"><table>
+      <tr><th>Weapon rule</th><th>Target override</th></tr>
+      <tr><td><strong>AP</strong></td><td>Best Defense value first</td></tr>
+      <tr><td><strong>Deadly</strong></td><td>Single-model Tough units, lowest remaining wounds first</td></tr>
+      <tr><td><strong>Takedown / Sniper</strong></td><td>Heroes first, then the priciest upgrade</td></tr>
+      <tr><td><strong>Unstoppable</strong></td><td>Enemy Aircraft first</td></tr>
+    </table></div>
+  </section>
+
+  <section id="solo-special" class="unit">
+    <h2>Special Rules &amp; Difficulty</h2>
+    <dl>
+      <dt>Challenge Bonus (difficulty dial)</dt><dd>Start of a round: if the AI holds <strong>as many</strong> objectives as you → all its units get <strong>+1 to hit</strong> that round. If it holds <strong>fewer</strong> → <strong>+1 to hit and +1 Defense</strong>. The community treats this as default-on, since the base AI is beatable.</dd>
+      <dt>Casters</dt><dd>Cast after moving, before attacking. Roll <strong>D3 + caster level</strong> for a random spell; if there's no legal target, cycle to the next, or skip.</dd>
+      <dt>Terrain</dt><dd>Moves into/behind <strong>cover</strong> unless rushing an objective through difficult terrain. Avoids <strong>difficult/dangerous</strong> terrain unless an objective is inside or it ignores the terrain. Flying/Strider treat it as open.</dd>
+      <dt>Ambush / Scout</dt><dd>Ambush units stay in reserve and arrive at the start of round 2, &gt;9" from enemies. Scout units deploy last.</dd>
+      <dt>Artillery / Indirect / Relentless</dt><dd>If in range of enemies, they <strong>Hold and shoot</strong> rather than advancing. Artillery deploys on the highest line-of-sight position.</dd>
+      <dt>Win conditions</dt><dd>The Solo rules add none of their own — use whatever standard GF mission you picked. (<strong>Horde Mode</strong> is the separate wave-survival variant: 2000-pt defenders, the enemy army respawns at rounds 4/7/10, survive to round 12.)</dd>
+    </dl>
+    <div class="solo-tree homebrew">
+      <h3>Optional house rule — “mirror the dice”</h3>
+      <p style="margin:0">Community fix for the AI being predictable: <strong>randomize your own activations too</strong> — roll for which of your units acts each time, the same way the AI does. Removes the human's planning edge and tightens the game. <span class="note">Not official.</span></p>
+    </div>
+    <p class="provenance"><strong>Name check:</strong> “One Page Solo Engine” (itch.io) is an unrelated generic RPG oracle — not this. <strong>Star Quest</strong> is a separate 2–4 hero RPG with a different nearest-hero-first AI. This tab is standard GF <strong>Solo &amp; Co-Op v3.5</strong>.</p>
+  </section>
+</div>
+
 </main>
 
 <footer>
@@ -647,6 +778,157 @@ function renderStrat(){
   g1.addEventListener('change',renderStrat);
   g2.addEventListener('change',renderStrat);
   renderStrat();
+})();
+
+// ---- Solo / Co-Op voice coach (deterministic, on-device) ----
+(function(){
+  var mic=document.getElementById('voxMic');
+  if(!mic) return;
+  var statusEl=document.getElementById('voxStatus');
+  var heardEl=document.getElementById('voxHeard');
+  var ansEl=document.getElementById('voxAns');
+  var unsup=document.getElementById('voxUnsupported');
+
+  function speak(t){
+    if(!('speechSynthesis' in window)||!t) return;
+    try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }catch(e){}
+  }
+  var ttsWarmed=false;
+  function warmTTS(){ if(ttsWarmed||!('speechSynthesis' in window)) return; try{ var u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); ttsWarmed=true; }catch(e){} }
+
+  function has(q){ for(var i=1;i<arguments.length;i++){ if(q.indexOf(arguments[i])>=0) return true; } return false; }
+
+  function rollActivation(){
+    var sec=Math.floor(Math.random()*3)+1;
+    return "Rolled a "+sec+". Activate a random eligible unit in section "+sec+". If section "+sec+" has no eligible units, go clockwise to the next section that does.";
+  }
+
+  var KB=[
+    {t:function(q){return has(q,'what can you','help','commands','what do you do','how do i use','options');},
+     a:function(){return {s:"Ask me about the AI's behaviour. Try: a shooting, hybrid, or melee unit; how it picks targets; the AP, Deadly, Takedown or Unstoppable rules; roll activation; the challenge bonus; casters; terrain; deployment; unit types; ambush and scout; or any keyword like Rush, Charge, Tough, or Shaken.", h:"<b>Try asking:</b><br>• a <b>shooting / hybrid / melee</b> unit<br>• <b>targeting</b> &amp; weapon rules (AP, Deadly, Takedown, Unstoppable)<br>• <b>roll activation</b><br>• <b>challenge bonus</b>, <b>casters</b>, <b>terrain</b>, <b>deployment</b>, <b>unit types</b>, <b>ambush / scout</b><br>• any glossary keyword (Rush, Charge, Tough, Shaken…)"};}},
+
+    {t:function(q){return has(q,'roll','which unit','next unit','whose turn','pick a unit','choose a unit','random unit','what unit act');},
+     a:function(){return {s:rollActivation()};}},
+
+    {t:function(q){return has(q,'activat','order','first activ','last activ','counter','sequence','who goes first');},
+     a:function(){return {s:"Roll a D3 for the section, then pick a random unit there; if a section is empty, go clockwise to the next. Shaken units activate after all others and just recover. Counter units activate after their section's other units. Transports activate before their cargo on round one.", h:"<b>Activation order</b><br>D3 for section → if empty, clockwise to next populated → random unit there.<br>• <b>Shaken</b>: act last, just recover.<br>• <b>Counter</b>: after their section's others.<br>• <b>Transports</b>: before their cargo on round 1."};}},
+
+    {t:function(q){return has(q,'target','priorit','who do','who does','what does it shoot','what does it attack','what to shoot');},
+     a:function(q){
+       if(has(q,'ap ','armor pierc','armour pierc')) return {s:"AP weapons target the enemy with the best Defense value first."};
+       if(has(q,'deadly')) return {s:"Deadly weapons target single-model Tough units first, lowest remaining wounds first."};
+       if(has(q,'takedown','sniper')) return {s:"Takedown and Sniper weapons target heroes first, then models with the most expensive upgrade."};
+       if(has(q,'unstoppable')) return {s:"Unstoppable weapons target enemy Aircraft first."};
+       return {s:"The AI targets the nearest valid target, preferring units that haven't activated yet, and a target in the open over one in cover. Then weapon rules override: AP hits the best Defense first; Deadly hits single-model Tough units with the lowest remaining wounds; Takedown and Sniper hit heroes first; Unstoppable hits Aircraft first.", h:"<b>Targeting</b><br>Nearest valid target → prefer <b>not-yet-activated</b> → prefer <b>open over cover</b>.<br>Then weapon overrides:<br>• <b>AP</b> → best Defense<br>• <b>Deadly</b> → single-model Tough, lowest wounds<br>• <b>Takedown / Sniper</b> → heroes first<br>• <b>Unstoppable</b> → Aircraft first"};
+     }},
+
+    {t:function(q){return has(q,'unstoppable');}, a:function(){return {s:"Unstoppable weapons target enemy Aircraft first."};}},
+    {t:function(q){return has(q,'takedown','sniper');}, a:function(){return {s:"Takedown and Sniper weapons target heroes first, then models with the most expensive upgrade."};}},
+    {t:function(q){return has(q,'deadly');}, a:function(){return {s:"Deadly weapons target single-model Tough units first, lowest remaining wounds first."};}},
+    {t:function(q){return /\bap\b/.test(q)||has(q,'armor pierc','armour pierc');}, a:function(){return {s:"AP weapons target the enemy with the best Defense value first."};}},
+
+    {t:function(q){return has(q,'shooting');},
+     a:function(){return {s:"Shooting unit. If there is an objective you don't control, advance toward it and shoot if that keeps an enemy in range, otherwise rush to it. If there is no free objective, advance toward the nearest enemy and shoot if you'll be in range, otherwise rush at them. Shooting units always try to stay at maximum range.", h:"<b>Shooting unit</b><br>1. Free objective? → Advance to it &amp; shoot if it keeps an enemy in range; else <b>Rush</b> to it.<br>2. No free objective? → Advance to nearest enemy &amp; shoot if in range; else <b>Rush</b> at them.<br><i>Always stays at max range.</i>"};}},
+    {t:function(q){return has(q,'hybrid');},
+     a:function(){return {s:"Hybrid unit. With a free objective: charge an enemy in the way if you can, else advance to the objective and shoot, else rush to it; if it's only in rush range, rush it. With no free objective: charge an enemy in charge range, else advance and shoot the nearest enemy, else rush at them.", h:"<b>Hybrid unit</b><br>1. Free obj + enemy in the way? → Charge if able; else Advance+shoot; else Rush.<br>2. Free obj only in Rush range? → Rush it.<br>3. Free obj, none in the way? → Advance+shoot if in range; else Rush.<br>4. No free obj? → Charge in range; else Advance+shoot nearest; else Rush."};}},
+    {t:function(q){return has(q,'melee');},
+     a:function(){return {s:"Melee unit. With a free objective: charge any enemy in the way if you can, otherwise rush to the objective. With no free objective: charge an enemy in charge range, otherwise rush at the nearest enemy.", h:"<b>Melee unit</b><br>1. Free objective? → Charge enemy in the way if able; else Rush to it.<br>2. No free objective? → Charge in charge range; else Rush at nearest enemy."};}},
+
+    {t:function(q){return has(q,'classif','unit type','what type','which tree','categor');},
+     a:function(){return {s:"Classify each AI unit before the game. No ranged weapons means Melee. Ranged better than melee means Shooting. Melee better than ranged means Hybrid. The type sets which decision tree it follows.", h:"<b>Unit types</b><br>• <b>Melee</b> = no ranged weapons<br>• <b>Shooting</b> = ranged better than melee<br>• <b>Hybrid</b> = melee better than ranged"};}},
+
+    {t:function(q){return has(q,'deploy','set up','setup','where do they start','placement');},
+     a:function(){return {s:"Split the AI's units into three equal groups. Divide its table edge into three sections and roll a D3 per group for its section. Then place units one at a time, as close as possible to the nearest objective, outside difficult and dangerous terrain unless they have Strider or Flying."};}},
+
+    {t:function(q){return has(q,'challenge','bonus','difficult','harder','too easy','cheat');},
+     a:function(){return {s:"Challenge bonus. At the start of a round, if the AI holds as many objectives as you, all its units get plus one to hit that round. If it holds fewer objectives, they get plus one to hit and plus one to Defense as well."};}},
+
+    {t:function(q){return has(q,'caster','spell','cast','psychic','magic');},
+     a:function(){return {s:"Casters cast after moving, before attacking. Roll D3 plus the caster's level to pick a random spell. If there is no legal target or not enough tokens, cycle to the next spell, or skip if none work."};}},
+
+    {t:function(q){return has(q,'terrain','cover','dangerous','woods','forest','ruins');},
+     a:function(){return {s:"The AI moves into or behind cover unless it's rushing an objective through difficult terrain. It avoids difficult and dangerous terrain unless an objective is inside, or it can ignore the terrain. Flying and Strider units treat that terrain as open."};}},
+
+    {t:function(q){return has(q,'ambush','reserve','scout','deep strike');},
+     a:function(){return {s:"Ambush AI units stay in reserve and deploy at the start of round two, more than nine inches from enemies. Scout units deploy last, after everything else."};}},
+
+    {t:function(q){return has(q,'control','seiz','win','victory','who owns','contest','objective');},
+     a:function(){return {s:"The AI controls an objective if it already holds it, or if more non-Shaken AI units than enemy units are within three inches of it. The Solo rules don't add their own win conditions; you use whatever standard mission you picked."};}},
+
+    {t:function(q){return has(q,'horde');},
+     a:function(){return {s:"Horde Mode is the separate wave-survival co-op variant. Your side totals two thousand points; the enemy army respawns from the corners at the start of rounds four, seven, and ten. Survive to round twelve. Your score is the points you earned times the last wave you cleared."};}},
+
+    {t:function(q){return has(q,'star quest','starquest');},
+     a:function(){return {s:"Star Quest is a separate two to four hero RPG game with its own nearest-hero-first AI activation. It's not these Solo and Co-op rules."};}},
+
+    {t:function(q){return has(q,'mirror','house rule','homebrew','randomize my','randomise my','my own activ','predictable','exploit');},
+     a:function(){return {s:"Optional community house rule: randomize your own activations too, rolling for which of your units acts the same way the AI does. It blunts your planning advantage and makes the AI feel smarter. It's not official."};}}
+  ];
+
+  function glossaryLookup(q){
+    var dl=document.querySelector('#glossary dl'); if(!dl) return null;
+    var dts=dl.querySelectorAll('dt');
+    for(var i=0;i<dts.length;i++){
+      var term=dts[i].textContent.toLowerCase().replace(/\(x\)/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+      if(!term) continue;
+      var first=term.split(' ')[0];
+      if(q.indexOf(term)>=0 || (first.length>3 && q.indexOf(first)>=0)){
+        var dd=dts[i].nextElementSibling;
+        if(dd&&dd.tagName==='DD') return dts[i].textContent.replace(/\s+/g,' ').trim()+'. '+dd.textContent.replace(/\s+/g,' ').trim();
+      }
+    }
+    return null;
+  }
+
+  function answer(q){
+    if(!q) return {s:"I didn't catch that. Tap the mic and ask about a shooting, hybrid, or melee unit; targeting; activation; or a keyword like Rush or Tough."};
+    for(var i=0;i<KB.length;i++){ if(KB[i].t(q)) return KB[i].a(q); }
+    var g=glossaryLookup(q);
+    if(g) return {s:g};
+    return {s:"I don't have a rule for that one. Try: a shooting, hybrid or melee unit; targeting; AP, Deadly or Takedown; roll activation; challenge bonus; casters; terrain; deployment; or a keyword like Rush, Tough, or Ambush."};
+  }
+
+  function dispatch(text){
+    var raw=(text||'').trim();
+    heardEl.textContent = raw ? ('"'+raw+'"') : '';
+    var q=raw.toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+    var a=answer(q);
+    ansEl.innerHTML = a.h || a.s;
+    speak(a.s);
+  }
+
+  window.__solo={answer:answer,dispatch:dispatch}; // for self-test
+
+  var exBtns=document.querySelectorAll('.vox-ex button');
+  for(var b=0;b<exBtns.length;b++){
+    exBtns[b].addEventListener('click',function(){ warmTTS(); dispatch(this.getAttribute('data-q')); });
+  }
+
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var rec=null, listening=false;
+  if(!SR){
+    mic.disabled=true; mic.style.opacity=0.5;
+    unsup.style.display='block';
+    unsup.textContent="Voice input isn't supported in this browser — tap the question buttons instead. (Mic works in Chrome, Edge, and Safari or Chrome on iPad.)";
+  } else {
+    mic.addEventListener('click',function(){
+      warmTTS();
+      if(listening){ try{rec.stop();}catch(e){} return; }
+      try{
+        rec=new SR(); rec.lang='en-US'; rec.interimResults=true; rec.maxAlternatives=1; rec.continuous=false;
+        var finalText='';
+        rec.onstart=function(){ listening=true; mic.classList.add('listening'); statusEl.textContent='Listening, tap again to stop'; heardEl.textContent=''; };
+        rec.onresult=function(e){
+          var interim='';
+          for(var i=e.resultIndex;i<e.results.length;i++){ var r=e.results[i]; if(r.isFinal) finalText+=r[0].transcript; else interim+=r[0].transcript; }
+          heardEl.textContent='"'+(finalText+interim).trim()+'"';
+        };
+        rec.onerror=function(e){ statusEl.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'Microphone blocked, allow it or tap a button below.':"Didn't catch that, try again."; };
+        rec.onend=function(){ listening=false; mic.classList.remove('listening'); statusEl.textContent=''; var t=finalText.trim(); if(t) dispatch(t); };
+        rec.start();
+      }catch(err){ statusEl.textContent='Could not start the mic, tap a button below instead.'; }
+    });
+  }
 })();
 </script>
 </body>
