@@ -1,6 +1,11 @@
 # Do NOT publish OPR's copyrighted rulebook PDF
 *.pdf
 
+# Remotion video project (keep node_modules/builds out of the public repo)
+guide-video/node_modules/
+guide-video/out/
+guide-video/.remotion/
+
 # OS / editor cruft
 Thumbs.db
 .DS_Store
