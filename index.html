@@ -77,6 +77,44 @@
   .note{color:var(--warn)}
   footer{max-width:760px;margin:0 auto;padding:18px 14px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
   a{color:var(--acc2)}
+  /* ===== OPR Card tab (.oprc-*) ===== */
+  .oprc-tab{padding:2px 0 40px}
+  .oprc-tab-head{margin:4px 2px 14px}
+  .oprc-tab-title{margin:0;font-size:1.25rem;font-weight:800;color:var(--ink)}
+  .oprc-tab-sub{margin:4px 0 0;font-size:.8rem;color:var(--muted)}
+  .oprc-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:0 0 18px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.35),0 8px 22px rgba(0,0,0,.28)}
+  .oprc-card-hero{border-color:var(--acc2)}
+  .oprc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:linear-gradient(180deg,#2f5a27 0%,#234a1e 60%,#1d3f19 100%);border-bottom:2px solid var(--acc)}
+  .oprc-name{font-size:1.08rem;font-weight:800;color:#f3fbef;line-height:1.15;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+  .oprc-count{font-weight:700;color:#bfe7ab;font-size:.92em}
+  .oprc-herotag{display:inline-block;vertical-align:middle;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:.6rem;font-weight:800;letter-spacing:.8px;background:var(--acc2);color:#06120e}
+  .oprc-pts{flex:0 0 auto;font-size:1.45rem;font-weight:800;color:#fff;line-height:1;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+  .oprc-pts span{display:block;font-size:.52rem;font-weight:700;letter-spacing:1.5px;text-align:right;color:#bfe7ab;text-shadow:none;margin-top:1px}
+  .oprc-stats{display:flex;gap:10px;padding:12px 14px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .oprc-stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+  .oprc-stat-lbl{font-size:.58rem;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+  .oprc-stat-val{font-size:1.6rem;font-weight:800;line-height:1;color:var(--acc)}
+  .oprc-def .oprc-stat-val{color:var(--acc2)}
+  .oprc-wpn-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .oprc-wpn{width:100%;min-width:340px;border-collapse:collapse;font-size:.82rem}
+  .oprc-wpn thead th{text-align:left;padding:7px 12px;font-size:.58rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--acc);background:rgba(126,200,80,.08);border-bottom:1px solid var(--line);white-space:nowrap}
+  .oprc-wpn tbody td{padding:8px 12px;color:var(--ink);border-bottom:1px solid rgba(42,58,48,.6);vertical-align:middle}
+  .oprc-wpn tbody tr:last-child td{border-bottom:0}
+  .oprc-wpn td:first-child{font-weight:600;white-space:nowrap}
+  .oprc-wpn th:nth-child(2),.oprc-wpn td:nth-child(2),.oprc-wpn th:nth-child(3),.oprc-wpn td:nth-child(3),.oprc-wpn th:nth-child(4),.oprc-wpn td:nth-child(4){text-align:center;width:1%;white-space:nowrap}
+  .oprc-wpn td:nth-child(3),.oprc-wpn td:nth-child(4){font-weight:700;color:var(--acc)}
+  .oprc-wpn td:last-child{color:var(--muted);font-size:.78rem}
+  .oprc-q{display:inline-block;margin-right:3px;font-weight:800;color:var(--warn)}
+  .oprc-rules{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:11px 14px;background:var(--panel2);border-top:1px solid var(--line)}
+  .oprc-rules-lbl{font-size:.56rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-right:2px}
+  .oprc-chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.74rem;font-weight:700;color:var(--ink);background:var(--panel);border:1px solid var(--line)}
+  .oprc-chip-tough{color:#06120e;background:var(--acc);border-color:var(--acc)}
+  .oprc-chip-hero{color:#06120e;background:var(--acc2);border-color:var(--acc2)}
+  .oprc-chip-amb,.oprc-chip-fast{color:#1a130a;background:var(--warn);border-color:var(--warn)}
+  .oprc-defs{padding:11px 14px 13px;background:var(--panel);border-top:1px solid var(--line)}
+  .oprc-def-row{font-size:.76rem;line-height:1.45;color:var(--muted);padding:2px 0}
+  .oprc-def-row b{color:var(--ink);font-weight:700}
+  .oprc-note{margin-top:7px;padding:7px 10px;font-size:.74rem;line-height:1.4;color:var(--ink);background:rgba(126,200,80,.08);border-left:3px solid var(--acc);border-radius:0 6px 6px 0}
 </style>
 </head>
 <body>
@@ -90,6 +128,7 @@
   <button class="active" data-tab="rounds">Each Round</button>
   <button data-tab="strategy">Strategy</button>
   <button data-tab="army">My Army</button>
+  <button data-tab="cards">Cards</button>
 </nav>
 
 <main>
@@ -354,6 +393,185 @@
     <p><strong>Hive Bond</strong> is your shared army rule — <span class="note">verify its exact effect via the Army Forge ⓘ tooltip</span> before the game; the wording determines how your units support each other.</p>
     <p><strong>Synergy in one line:</strong> the two Carnivo-Rex soak the gunline's fire and delete infantry up the middle, while the Fast Soul-Snatchers, Ravenous Beasts, and Snatcher Lord flank past the distracted Humans to grab and hold the markers that win the game.</p>
   </section>
+</div>
+
+<!-- ============ TAB 4: OPR-STYLE UNIT CARDS ============ -->
+<div id="cards" class="tab">
+<section class="oprc-tab">
+  <div class="oprc-tab-head">
+    <h2 class="oprc-tab-title">Alien Hives — Unit Cards</h2>
+    <p class="oprc-tab-sub">Official OPR card format · tap a table to scroll horizontally</p>
+  </div>
+
+  <article class="oprc-card">
+    <header class="oprc-head">
+      <div class="oprc-name">Carnivo-Rex <span class="oprc-count">[1]</span></div>
+      <div class="oprc-pts">295<span>pts</span></div>
+    </header>
+    <div class="oprc-stats">
+      <div class="oprc-stat"><span class="oprc-stat-lbl">Quality</span><span class="oprc-stat-val">4+</span></div>
+      <div class="oprc-stat oprc-def"><span class="oprc-stat-lbl">Defense</span><span class="oprc-stat-val">2+</span></div>
+    </div>
+    <div class="oprc-wpn-wrap"><table class="oprc-wpn">
+      <thead><tr><th>Weapon</th><th>Range</th><th>A</th><th>AP</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr><td><span class="oprc-q">3×</span> Heavy Razor Claws</td><td>—</td><td>3</td><td>1</td><td>—</td></tr>
+        <tr><td>Stomp</td><td>—</td><td>4</td><td>1</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oprc-rules">
+      <span class="oprc-rules-lbl">Special</span>
+      <span class="oprc-chip">Fearless</span><span class="oprc-chip oprc-chip-tough">Tough(12)</span><span class="oprc-chip">Hive Bond</span>
+    </div>
+    <div class="oprc-defs">
+      <div class="oprc-def-row"><b>Fearless</b> — Re-roll a failed morale test (passes on 4+).</div>
+      <div class="oprc-def-row"><b>Tough(12)</b> — Takes 12 wounds before dying.</div>
+      <div class="oprc-def-row"><b>AP(1)</b> — Enemy subtracts 1 from their save roll.</div>
+      <div class="oprc-note">13 melee attacks total, all AP1 — pure close-combat bruiser. Single model = caps any enemy Blast at 1 hit.</div>
+    </div>
+  </article>
+
+  <article class="oprc-card">
+    <header class="oprc-head">
+      <div class="oprc-name">Toxico-Rex <span class="oprc-count">[1]</span></div>
+      <div class="oprc-pts">360<span>pts</span></div>
+    </header>
+    <div class="oprc-stats">
+      <div class="oprc-stat"><span class="oprc-stat-lbl">Quality</span><span class="oprc-stat-val">4+</span></div>
+      <div class="oprc-stat oprc-def"><span class="oprc-stat-lbl">Defense</span><span class="oprc-stat-val">2+</span></div>
+    </div>
+    <div class="oprc-wpn-wrap"><table class="oprc-wpn">
+      <thead><tr><th>Weapon</th><th>Range</th><th>A</th><th>AP</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr><td>Acid Spurt</td><td>12"</td><td>2</td><td>—</td><td>Blast(3), Bane</td></tr>
+        <tr><td>Whip Limbs</td><td>—</td><td>8</td><td>—</td><td>Bane, Precise</td></tr>
+        <tr><td>Stomp</td><td>—</td><td>4</td><td>1</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oprc-rules">
+      <span class="oprc-rules-lbl">Special</span>
+      <span class="oprc-chip">Fearless</span><span class="oprc-chip oprc-chip-tough">Tough(12)</span><span class="oprc-chip">Fear(2)</span><span class="oprc-chip">Regeneration</span><span class="oprc-chip">Hive Bond</span>
+    </div>
+    <div class="oprc-defs">
+      <div class="oprc-def-row"><b>Regeneration</b> — Roll a die per wound; 5+ ignores it. (Your durable anvil.)</div>
+      <div class="oprc-def-row"><b>Fear(2)</b> — Counts as +2 wounds when deciding who won a melee.</div>
+      <div class="oprc-def-row"><b>Blast(3)</b> — Ignores cover; ×3 hits (capped at models in target — 1 vs a single model).</div>
+      <div class="oprc-def-row"><b>Bane</b> — Re-roll the enemy's natural-6 saves and ignore their Regeneration.</div>
+      <div class="oprc-def-row"><b>Precise</b> — You choose which model in the target takes the wounds.</div>
+    </div>
+  </article>
+
+  <article class="oprc-card">
+    <header class="oprc-head">
+      <div class="oprc-name">Hive Burrower <span class="oprc-count">[1]</span></div>
+      <div class="oprc-pts">420<span>pts</span></div>
+    </header>
+    <div class="oprc-stats">
+      <div class="oprc-stat"><span class="oprc-stat-lbl">Quality</span><span class="oprc-stat-val">4+</span></div>
+      <div class="oprc-stat oprc-def"><span class="oprc-stat-lbl">Defense</span><span class="oprc-stat-val">2+</span></div>
+    </div>
+    <div class="oprc-wpn-wrap"><table class="oprc-wpn">
+      <thead><tr><th>Weapon</th><th>Range</th><th>A</th><th>AP</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr><td><span class="oprc-q">3×</span> Heavy Razor Claws</td><td>—</td><td>3</td><td>1</td><td>—</td></tr>
+        <tr><td>Stomp</td><td>—</td><td>5</td><td>2</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oprc-rules">
+      <span class="oprc-rules-lbl">Special</span>
+      <span class="oprc-chip">Fearless</span><span class="oprc-chip oprc-chip-tough">Tough(15)</span><span class="oprc-chip">Fear(3)</span><span class="oprc-chip oprc-chip-amb">Ambush</span><span class="oprc-chip">Hive Bond</span>
+    </div>
+    <div class="oprc-defs">
+      <div class="oprc-def-row"><b>Ambush</b> — Starts in reserve; deploys from round 2 over 9" from enemies; can't seize the round it arrives.</div>
+      <div class="oprc-def-row"><b>Tough(15)</b> — Takes 15 wounds before dying.</div>
+      <div class="oprc-def-row"><b>Fear(3)</b> — Counts as +3 wounds when deciding who won a melee.</div>
+      <div class="oprc-note">Deep-strikes round 2 onto the enemy's scariest unit. Cripples a gun/support team (≈1–2 models) and pins it — it won't wipe a full team in one go.</div>
+    </div>
+  </article>
+
+  <article class="oprc-card">
+    <header class="oprc-head">
+      <div class="oprc-name">Soul-Snatchers <span class="oprc-count">[5]</span></div>
+      <div class="oprc-pts">160<span>pts</span></div>
+    </header>
+    <div class="oprc-stats">
+      <div class="oprc-stat"><span class="oprc-stat-lbl">Quality</span><span class="oprc-stat-val">3+</span></div>
+      <div class="oprc-stat oprc-def"><span class="oprc-stat-lbl">Defense</span><span class="oprc-stat-val">4+</span></div>
+    </div>
+    <div class="oprc-wpn-wrap"><table class="oprc-wpn">
+      <thead><tr><th>Weapon</th><th>Range</th><th>A</th><th>AP</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr><td><span class="oprc-q">5×</span> Heavy Claws</td><td>—</td><td>2</td><td>1</td><td>Rending</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oprc-rules">
+      <span class="oprc-rules-lbl">Special</span>
+      <span class="oprc-chip oprc-chip-fast">Fast</span><span class="oprc-chip">Strider</span><span class="oprc-chip">Hive Bond</span>
+    </div>
+    <div class="oprc-defs">
+      <div class="oprc-def-row"><b>Fast</b> — +2" when Advancing, +4" when Rushing/Charging.</div>
+      <div class="oprc-def-row"><b>Rending</b> — A natural 6 to hit gains strong AP and ignores Regeneration. (Your tank-grinder.)</div>
+      <div class="oprc-def-row"><b>Strider</b> — Ignores difficult-terrain movement penalties.</div>
+      <div class="oprc-note">Main scorer + anti-vehicle. 10 attacks on 3+; Rending 6s shred Defense-2 tanks.</div>
+    </div>
+  </article>
+
+  <article class="oprc-card">
+    <header class="oprc-head">
+      <div class="oprc-name">Mortar Beast <span class="oprc-count">[1]</span></div>
+      <div class="oprc-pts">155<span>pts</span></div>
+    </header>
+    <div class="oprc-stats">
+      <div class="oprc-stat"><span class="oprc-stat-lbl">Quality</span><span class="oprc-stat-val">4+</span></div>
+      <div class="oprc-stat oprc-def"><span class="oprc-stat-lbl">Defense</span><span class="oprc-stat-val">3+</span></div>
+    </div>
+    <div class="oprc-wpn-wrap"><table class="oprc-wpn">
+      <thead><tr><th>Weapon</th><th>Range</th><th>A</th><th>AP</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr><td>Spore Gun</td><td>24"</td><td>2</td><td>—</td><td>Blast(3), Indirect, Shred</td></tr>
+        <tr><td>Heavy Razor Claws</td><td>—</td><td>3</td><td>1</td><td>—</td></tr>
+        <tr><td>Stomp</td><td>—</td><td>2</td><td>1</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oprc-rules">
+      <span class="oprc-rules-lbl">Special</span>
+      <span class="oprc-chip">Fear(1)</span><span class="oprc-chip oprc-chip-tough">Tough(6)</span><span class="oprc-chip">Hive Bond</span>
+    </div>
+    <div class="oprc-defs">
+      <div class="oprc-def-row"><b>Indirect</b> — Fire without line of sight, ignores cover (−1 to hit if it moved).</div>
+      <div class="oprc-def-row"><b>Blast(3)</b> — Ignores cover; ×3 hits (capped at models in target). Your anti-horde tool.</div>
+      <div class="oprc-def-row"><b>Shred</b> — On an enemy save roll of 1, deal 1 extra wound (verify on card).</div>
+      <div class="oprc-note">Keep it STATIONARY — moving drops it to −1 to hit and halves its output.</div>
+    </div>
+  </article>
+
+  <article class="oprc-card oprc-card-hero">
+    <header class="oprc-head">
+      <div class="oprc-name">Snatcher Lord <span class="oprc-count">[1]</span> <span class="oprc-herotag">HERO</span></div>
+      <div class="oprc-pts">85<span>pts</span></div>
+    </header>
+    <div class="oprc-stats">
+      <div class="oprc-stat"><span class="oprc-stat-lbl">Quality</span><span class="oprc-stat-val">3+</span></div>
+      <div class="oprc-stat oprc-def"><span class="oprc-stat-lbl">Defense</span><span class="oprc-stat-val">4+</span></div>
+    </div>
+    <div class="oprc-wpn-wrap"><table class="oprc-wpn">
+      <thead><tr><th>Weapon</th><th>Range</th><th>A</th><th>AP</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr><td>Heavy Claws</td><td>—</td><td>4</td><td>1</td><td>Rending</td></tr>
+      </tbody>
+    </table></div>
+    <div class="oprc-rules">
+      <span class="oprc-rules-lbl">Special</span>
+      <span class="oprc-chip oprc-chip-hero">Hero</span><span class="oprc-chip">Strider</span><span class="oprc-chip oprc-chip-tough">Tough(3)</span><span class="oprc-chip">Hive Bond</span>
+    </div>
+    <div class="oprc-defs">
+      <div class="oprc-def-row"><b>Hero</b> — A single powerful model that can join a unit.</div>
+      <div class="oprc-def-row"><b>Tough(3)</b> — Takes 3 wounds before dying. <b>Fragile — keep behind a beast vs snipers.</b></div>
+      <div class="oprc-def-row"><b>Rending</b> — A natural 6 to hit gains strong AP and ignores Regeneration.</div>
+      <div class="oprc-note">Late-game objective dart. Note: Strider, NOT Fast — moves 6"/12".</div>
+    </div>
+  </article>
+</section>
 </div>
 
 </main>
