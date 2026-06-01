@@ -115,6 +115,18 @@
   .oprc-def-row{font-size:.76rem;line-height:1.45;color:var(--muted);padding:2px 0}
   .oprc-def-row b{color:var(--ink);font-weight:700}
   .oprc-note{margin-top:7px;padding:7px 10px;font-size:.74rem;line-height:1.4;color:var(--ink);background:rgba(126,200,80,.08);border-left:3px solid var(--acc);border-radius:0 6px 6px 0}
+  .oprc-roll{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 14px;background:rgba(226,162,59,.12);border-top:1px solid var(--line);font-size:.82rem;color:var(--ink)}
+  .oprc-roll-lbl{font-size:.6rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--warn)}
+  .oprc-roll b{color:var(--warn);font-size:1rem}
+  .oprc-play,.oprc-avoid{padding:10px 14px;font-size:.78rem;line-height:1.5;border-top:1px solid var(--line)}
+  .oprc-play{background:rgba(126,200,80,.07)}
+  .oprc-avoid{background:rgba(228,103,91,.08)}
+  .oprc-tag{display:inline-block;margin-right:7px;padding:2px 8px;border-radius:5px;font-size:.6rem;font-weight:800;letter-spacing:.6px;vertical-align:middle}
+  .oprc-tag-go{background:var(--acc);color:#06120e}
+  .oprc-tag-no{background:var(--danger);color:#1a0b09}
+  .oprc-play ul,.oprc-avoid ul{margin:6px 0 0;padding-left:18px}
+  .oprc-play li,.oprc-avoid li{margin:4px 0;color:var(--muted)}
+  .oprc-play li b,.oprc-avoid li b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -429,6 +441,11 @@
       <div class="oprc-def-row"><b>AP(1)</b> — Enemy subtracts 1 from their save roll.</div>
       <div class="oprc-note">13 melee attacks total, all AP1 — pure close-combat bruiser. Single model = caps any enemy Blast at 1 hit.</div>
     </div>
+    <div class="oprc-roll"><span class="oprc-roll-lbl">🎲 Dice</span> Melee: roll <b>13</b> dice, hit on <b>4+</b> (9 claws + 4 stomp)</div>
+    <div class="oprc-play"><span class="oprc-tag oprc-tag-go">USE</span> The hammer.
+      <ul><li>Advance up the middle <b>beside the Toxico</b>; grind his army rounds 1–3.</li><li>Charge his biggest infantry blob or any Defense-2 vehicle — 13 AP1 dice shred both.</li><li>Round 4: park on a marker. Tough12 is almost impossible to shift.</li></ul></div>
+    <div class="oprc-avoid"><span class="oprc-tag oprc-tag-no">AVOID</span>
+      <ul><li>Don't solo a <b>Deadly3 walker/tank</b> (Orc Melee Walker, HDF walkers) — it out-trades you. Gang it.</li><li>Don't let cheap chaff tar-pit it — Fatigue means you then hit on 6s only.</li><li>Keep it ~12" from the Toxico so he can't focus-fire both at once.</li></ul></div>
   </article>
 
   <article class="oprc-card">
@@ -459,6 +476,11 @@
       <div class="oprc-def-row"><b>Bane</b> — Re-roll the enemy's natural-6 saves and ignore their Regeneration.</div>
       <div class="oprc-def-row"><b>Precise</b> — You choose which model in the target takes the wounds.</div>
     </div>
+    <div class="oprc-roll"><span class="oprc-roll-lbl">🎲 Dice</span> Melee: <b>12</b> @ 4+ (8 whip + 4 stomp) · Shooting: <b>2</b> @ 4+, Blast(3)</div>
+    <div class="oprc-play"><span class="oprc-tag oprc-tag-go">USE</span> Your durable anvil — <b>lead with this one.</b>
+      <ul><li>Push it ahead of the Carnivo to <b>eat the AP-Deadly fire</b> — Regeneration ignores ~1/3 of all wounds.</li><li>Whip Limbs (Bane) shreds vehicles and ignores enemy Regeneration.</li><li>Acid Spurt thins a horde or chips a unit at 12".</li></ul></div>
+    <div class="oprc-avoid"><span class="oprc-tag oprc-tag-no">AVOID</span>
+      <ul><li>Don't hide it — its whole job is to soak fire up front.</li><li>Don't fire Acid Spurt at a <b>single big model</b> (Blast caps at 1 hit).</li><li>Don't let chaff Fatigue-lock it off an objective.</li></ul></div>
   </article>
 
   <article class="oprc-card">
@@ -487,6 +509,11 @@
       <div class="oprc-def-row"><b>Fear(3)</b> — Counts as +3 wounds when deciding who won a melee.</div>
       <div class="oprc-note">Deep-strikes round 2 onto the enemy's scariest unit. Cripples a gun/support team (≈1–2 models) and pins it — it won't wipe a full team in one go.</div>
     </div>
+    <div class="oprc-roll"><span class="oprc-roll-lbl">🎲 Dice</span> Melee: roll <b>14</b> dice, hit on <b>4+</b> (9 claws + 5 stomp)</div>
+    <div class="oprc-play"><span class="oprc-tag oprc-tag-go">USE</span> Ambush mirror + backfield assassin.
+      <ul><li>Keep it in <b>reserve</b>. Round 2, drop it >9" from enemies near his scariest gun/tank, then charge next turn.</li><li>Cripples a gun team and <b>pins it</b> so it can't shoot.</li><li>You alternate placing reserves with him — denies his ambush free rein.</li></ul></div>
+    <div class="oprc-avoid"><span class="oprc-tag oprc-tag-no">AVOID</span>
+      <ul><li>Don't expect a full <b>wipe</b> — it kills ~1–2 of a 3-model team.</li><li>It <b>can't seize the round it lands</b> — don't drop onto a marker expecting to hold it that turn.</li><li>Don't drop it isolated where it gets focus-fired before it charges.</li></ul></div>
   </article>
 
   <article class="oprc-card">
@@ -514,6 +541,11 @@
       <div class="oprc-def-row"><b>Strider</b> — Ignores difficult-terrain movement penalties.</div>
       <div class="oprc-note">Main scorer + anti-vehicle. 10 attacks on 3+; Rending 6s shred Defense-2 tanks.</div>
     </div>
+    <div class="oprc-roll"><span class="oprc-roll-lbl">🎲 Dice</span> Melee: roll <b>10</b> dice, hit on <b>3+</b>, Rending (5 models × 2)</div>
+    <div class="oprc-play"><span class="oprc-tag oprc-tag-go">USE</span> Main scorer + tank-grinder.
+      <ul><li>Fast — 16" Rush. <b>Hunt his transports</b>; pop them before the cargo gets out.</li><li>Rending 6s become high-AP → grind Defense-2 tanks the monsters can't reach.</li><li>Round 4: flood and hold markers.</li></ul></div>
+    <div class="oprc-avoid"><span class="oprc-tag oprc-tag-no">AVOID</span>
+      <ul><li>Don't push >9" ahead of a monster — they're D4 / 5 wounds and melt to one shooting unit.</li><li>Don't throw them at a tough melee unit they can't beat.</li><li>Don't burn them as a speed bump — too valuable as scorers.</li></ul></div>
   </article>
 
   <article class="oprc-card">
@@ -543,6 +575,11 @@
       <div class="oprc-def-row"><b>Shred</b> — On an enemy save roll of 1, deal 1 extra wound (verify on card).</div>
       <div class="oprc-note">Keep it STATIONARY — moving drops it to −1 to hit and halves its output.</div>
     </div>
+    <div class="oprc-roll"><span class="oprc-roll-lbl">🎲 Dice</span> Shooting: roll <b>2</b> dice, hit on <b>4+</b> (5+ if it moved) · Blast(3), Indirect</div>
+    <div class="oprc-play"><span class="oprc-tag oprc-tag-go">USE</span> Anti-horde artillery.
+      <ul><li>Park it in the <b>backfield and never move it.</b></li><li>Lob Blast3 at his densest infantry or hidden units — Indirect needs no line of sight and ignores cover.</li><li>Your best answer to a massed Ork mob.</li></ul></div>
+    <div class="oprc-avoid"><span class="oprc-tag oprc-tag-no">AVOID</span>
+      <ul><li><b>Don't move it</b> — −1 to hit halves its output.</li><li>Don't shoot single big models (Blast caps at 1).</li><li>Don't push it into melee — it's a gun, not a fighter.</li></ul></div>
   </article>
 
   <article class="oprc-card oprc-card-hero">
@@ -570,6 +607,11 @@
       <div class="oprc-def-row"><b>Rending</b> — A natural 6 to hit gains strong AP and ignores Regeneration.</div>
       <div class="oprc-note">Late-game objective dart. Note: Strider, NOT Fast — moves 6"/12".</div>
     </div>
+    <div class="oprc-roll"><span class="oprc-roll-lbl">🎲 Dice</span> Melee: roll <b>4</b> dice, hit on <b>3+</b>, Rending</div>
+    <div class="oprc-play"><span class="oprc-tag oprc-tag-go">USE</span> Home guard + late contester.
+      <ul><li>Camp your back/home marker to <b>deny his ambush a legal >9" landing.</b></li><li>Late game, dart within 3" of a marker to contest it (cancels his control).</li></ul></div>
+    <div class="oprc-avoid"><span class="oprc-tag oprc-tag-no">AVOID</span>
+      <ul><li>Keep him <b>behind a monster or terrain</b> vs snipers — Takedown one-shots a Tough3 hero.</li><li>Don't pick fights — he's a contester, not a duelist.</li><li>Remember: Strider, <b>not Fast</b> — only 6"/12" move.</li></ul></div>
   </article>
 </section>
 </div>
