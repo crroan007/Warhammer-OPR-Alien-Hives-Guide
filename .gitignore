@@ -15,3 +15,9 @@ guide-video/public/voiceover/
 # OS / editor cruft
 Thumbs.db
 .DS_Store
+
+# Local secrets — never commit (filled-in API keys live here)
+*.local.ps1
+tools/*.local.ps1
+*.key
+.env
