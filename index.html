@@ -1012,7 +1012,7 @@ function renderStrat(){
   var state={round:1,seq:0,units:[]};
   var LSK='oprNarratorArmy';
   function save(){ try{ localStorage.setItem(LSK, JSON.stringify(state)); }catch(e){} }
-  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state=p; if(!state.seq) state.seq=state.units.length; } } }catch(e){} }
+  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; } } }catch(e){} }
   function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
   function onTable(u){ return !(u.flags.ambush && state.round<2); }
 
