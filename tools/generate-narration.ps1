@@ -33,20 +33,11 @@ try {
 
   if ($List) { & node $gen --list; return }
 
-  if ([string]::IsNullOrWhiteSpace($VoiceId)) {
-    $VoiceId = Read-Host 'Paste your voice_id (or press Enter to list your voices first)'
-  }
-  if ([string]::IsNullOrWhiteSpace($VoiceId)) {
-    Write-Host "`nYour ElevenLabs voices:" -ForegroundColor Cyan
-    & node $gen --list
-    $VoiceId = Read-Host "`nNow paste the voice_id you want"
-  }
-  if ([string]::IsNullOrWhiteSpace($VoiceId)) { Write-Host 'No voice_id entered. Aborting.' -ForegroundColor Red; return }
-
-  $argv = @($gen, '--voice', $VoiceId)
-  if (-not [string]::IsNullOrWhiteSpace($Model)) { $argv += @('--model', $Model) }
+  $argv = @($gen)
+  if (-not [string]::IsNullOrWhiteSpace($VoiceId)) { $argv += @('--voice', $VoiceId) }
+  if (-not [string]::IsNullOrWhiteSpace($Model))   { $argv += @('--model', $Model) }
   if ($Force) { $argv += '--force' }
-  Write-Host "Generating narration clips with voice $VoiceId ..." -ForegroundColor Cyan
+  Write-Host 'Generating narration clips...' -ForegroundColor Cyan
   & node @argv
 }
 finally {

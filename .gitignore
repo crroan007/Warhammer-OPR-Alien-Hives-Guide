@@ -21,3 +21,5 @@ Thumbs.db
 tools/*.local.ps1
 *.key
 .env
+*.local.json
+tools/*.local.json

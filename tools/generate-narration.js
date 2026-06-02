@@ -12,13 +12,18 @@ const fs = require('fs'), path = require('path'), https = require('https');
 const ROOT = path.resolve(__dirname, '..');
 const AUDIO = path.join(ROOT, 'audio');
 const manifest = JSON.parse(fs.readFileSync(path.join(AUDIO, 'manifest.json'), 'utf8'));
+// Permanent local config (gitignored): remembers your voice_id so you never paste it again.
+const CONFIG = path.join(__dirname, 'narration.config.local.json');
+function readConfig() { try { return JSON.parse(fs.readFileSync(CONFIG, 'utf8')); } catch (e) { return {}; } }
+function writeConfig(o) { try { fs.writeFileSync(CONFIG, JSON.stringify(o, null, 2) + '\n'); } catch (e) {} }
+const cfg = readConfig();
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const LIST = flag('--list'), FORCE = flag('--force'), DRY = flag('--dry');
 const ONLY = opt('--only');
-const VOICE = opt('--voice') || process.env.ELEVEN_VOICE_ID;
-const KEY = process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY;
+const VOICE = opt('--voice') || process.env.ELEVEN_VOICE_ID || cfg.voiceId;
+const KEY = process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY || cfg.apiKey;
 const MODEL = opt('--model') || manifest.model || 'eleven_multilingual_v2';
 const VS = manifest.voiceSettings || { stability: 0.4, similarity_boost: 0.85, style: 0.35 };
 
@@ -83,7 +88,8 @@ async function ttsOne(id, text) {
   }
   if (!KEY) { console.error('No API key. Set ELEVENLABS_API_KEY (run generate-narration.ps1, which prompts hidden).'); process.exit(2); }
   if (LIST) { await listVoices(); return; }
-  if (!VOICE) { console.error('No voice id. Pass --voice <id> or set ELEVEN_VOICE_ID. Run with --list to see your voices.'); process.exit(2); }
+  if (!VOICE) { console.error('No voice id. Put it in tools/narration.config.local.json ({"voiceId":"..."}), or pass --voice <id> once (it will be saved). Run --list to see your voices.'); process.exit(2); }
+  if (cfg.voiceId !== VOICE) { cfg.voiceId = VOICE; writeConfig(cfg); console.log("Saved your voice id permanently (tools/narration.config.local.json) - won't ask again."); }
 
   if (!fs.existsSync(AUDIO)) fs.mkdirSync(AUDIO, { recursive: true });
   let done = 0, skip = 0, fail = 0;
