@@ -126,6 +126,7 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button id="narAdd" class="nar-btn ghost">+ Add unit</button>
       <button id="narSample" class="nar-btn ghost">Load HDF sample</button>
+      <button id="narImport" class="nar-btn ghost">Load Army Forge list</button>
     </div>
     <p class="muted small">Type sets the decision tree. Flags change behaviour (Artillery, Aircraft, Caster, Ambush, Scout, Counter, Fast). Tick <em>Shaken</em> during play — Shaken units activate last and just recover.</p>
   </section>
@@ -358,6 +359,8 @@
     return { name:u.name, type:type, section:1, flags:flags, weapon:weapon, cost:u.cost };
   }
   function addOPRUnit(){ var as=$('narArmySel'), us=$('narUnitSel'); var uid=as&&as.value, ui=us&&us.value; if(!uid||ui===''||!ARMY[uid]) return; var u=ARMY[uid].units[parseInt(ui,10)]; if(u) addUnit(deriveOPR(u)); }
+  // Load a fully-upgraded list baked from Army Forge (tools/import-list.js) -> replaces the AI army.
+  function loadImported(){ fetch('data/ai-army.json').then(function(r){return r.ok?r.json():null;}).then(function(L){ if(!L||!L.units||!L.units.length){ stageMsg('No imported list found. Run: node tools/import-list.js <army-forge-share-link>'); return; } state.units=[]; L.units.forEach(function(u){ pushUnit(u); }); save(); renderArmy(); renderPlay(); if($('narLog'))$('narLog').innerHTML=''; stageMsg('Imported "'+L.name+'" — '+L.units.length+' units, '+(L.points||'?')+' pts. Tap "Next AI Activation".'); }).catch(function(){ stageMsg('Could not load imported list.'); }); }
 
   var Q={
     OBJ:"Any objective still going spare that this lot could make for?",
@@ -759,6 +762,7 @@
   loadArmyIndex();
   if($('narArmySel')) $('narArmySel').addEventListener('change',function(){ loadArmy(this.value); });
   if($('narAddUnit')) $('narAddUnit').addEventListener('click',addOPRUnit);
+  if($('narImport')) $('narImport').addEventListener('click',loadImported);
   $('narNext').addEventListener('click',startActivation);
   $('narNewRound').addEventListener('click',newRound);
   $('narObjMinus').addEventListener('click',function(){ setObjCount(state.objectives.length-1); });
