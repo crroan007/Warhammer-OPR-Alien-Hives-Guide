@@ -22,7 +22,7 @@ const flag = (n) => args.includes(n);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const LIST = flag('--list'), FORCE = flag('--force'), DRY = flag('--dry');
 const ONLY = opt('--only');
-const VOICE = opt('--voice') || process.env.ELEVEN_VOICE_ID || cfg.voiceId;
+const VOICE = opt('--voice') || process.env.ELEVEN_VOICE_ID || cfg.voiceId || 'wyWA56cQNU2KqUW4eCsI'; // default project narrator voice (ID only - harmless without the API key)
 const KEY = process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY || cfg.apiKey;
 const MODEL = opt('--model') || manifest.model || 'eleven_multilingual_v2';
 const VS = manifest.voiceSettings || { stability: 0.4, similarity_boost: 0.85, style: 0.35 };
