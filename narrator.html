@@ -97,6 +97,9 @@
   .nar-num2{width:64px;padding:8px;background:#0e1410;color:var(--ink);border:1px solid var(--acc);border-radius:8px;font-size:16px;text-align:center}
   .nar-report{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:11px 0 0;padding:9px 10px;background:rgba(226,162,59,.10);border:1px dashed var(--warn);border-radius:9px;font-size:13px;color:var(--ink)}
   .nar-react{margin:10px 0 0;font-size:15px;font-weight:800;color:var(--acc);line-height:1.4}
+  .nar-build{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
+  .nar-build select{flex:1;min-width:120px;max-width:46%;padding:8px;background:#0e1410;color:var(--ink);border:1px solid var(--line);border-radius:7px;font-size:13px;-webkit-appearance:none;appearance:none}
+  .nar-pts{margin-left:auto;font-size:13px;font-weight:800;color:var(--acc2);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -113,6 +116,12 @@
 
   <section class="unit">
     <h2>AI Army</h2>
+    <div class="nar-build">
+      <select id="narArmySel"><option value="">Loading armies…</option></select>
+      <select id="narUnitSel"><option value="">— pick an army —</option></select>
+      <button id="narAddUnit" class="nar-btn">+ Add</button>
+      <span class="nar-pts" id="narPts">— · 0 units</span>
+    </div>
     <div id="narUnits"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button id="narAdd" class="nar-btn ghost">+ Add unit</button>
@@ -231,7 +240,7 @@
   function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
   function onTable(u){ return !(u.flags.ambush && state.round<2); }
 
-  function pushUnit(d){ d=d||{}; var u={id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}; if(d.weapon) u.weapon=d.weapon; state.units.push(u); }
+  function pushUnit(d){ d=d||{}; var u={id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}; if(d.weapon) u.weapon=d.weapon; if(d.cost!=null) u.cost=d.cost; state.units.push(u); }
   function addUnit(d){ pushUnit(d); save(); renderArmy(); renderPlay(); }
   function removeUnit(id){ state.units=state.units.filter(function(u){return u.id!==id;}); save(); renderArmy(); renderPlay(); }
   function loadSample(){ state.units=[]; state.round=1; state.seq=0;
@@ -323,6 +332,33 @@
   }
 
   // ---------- decision trees (the legal logic — unchanged from the rules) ----------
+  // ---- in-app OPR army picker (reads baked data/, auto-fills type/flags/weapon-profile + points) ----
+  var ARMY={};
+  function renderPoints(){ var el=$('narPts'); if(!el) return; var t=0,n=state.units.length; state.units.forEach(function(u){ if(u.cost) t+=u.cost; }); el.textContent=(t?t+' pts':'—')+' · '+n+' unit'+(n===1?'':'s'); }
+  function loadArmyIndex(){ try{ fetch('data/armies-index.json').then(function(r){return r.ok?r.json():[];}).then(function(idx){ var s=$('narArmySel'); if(!s)return; s.innerHTML='<option value="">— choose an OPR army —</option>'; idx.forEach(function(a){ var o=document.createElement('option'); o.value=a.uid; o.textContent=a.name; s.appendChild(o); }); }).catch(function(){ var s=$('narArmySel'); if(s) s.innerHTML='<option value="">army list unavailable</option>'; }); }catch(e){} }
+  function fillUnits(b){ var us=$('narUnitSel'); us.innerHTML=''; (b.units||[]).forEach(function(u,i){ var o=document.createElement('option'); o.value=i; o.textContent=u.name+' — '+u.cost+'pts'; us.appendChild(o); }); }
+  function loadArmy(uid){ var us=$('narUnitSel'); if(!us)return; if(!uid){ us.innerHTML='<option value="">— pick an army —</option>'; return; } if(ARMY[uid]){ fillUnits(ARMY[uid]); return; } us.innerHTML='<option value="">loading…</option>'; fetch('data/armies/'+uid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(b){ if(b){ ARMY[uid]=b; fillUnits(b); } }).catch(function(){ us.innerHTML='<option value="">unavailable</option>'; }); }
+  function deriveOPR(u){
+    var weps=u.weapons||[];
+    var ranged=weps.filter(function(w){return (w.range||0)>0;});
+    var melee=weps.filter(function(w){return !(w.range||0);});
+    var type=(ranged.length && !melee.length)?'shooting':((melee.length && !ranged.length)?'melee':'hybrid');
+    var rl=(u.rules||[]).map(function(r){return (r+'').toLowerCase();});
+    function hasr(n){ return rl.some(function(r){return r.indexOf(n)>=0;}); }
+    var flags={ fast:hasr('fast'), ambush:hasr('ambush'), scout:hasr('scout'), artillery:hasr('artillery'), aircraft:hasr('aircraft'), counter:hasr('counter'), caster:hasr('caster') };
+    var pool=(type==='melee'?melee:ranged); if(!pool.length) pool=weps;
+    var best=null,bn=-1; pool.forEach(function(w){ var n=(w.count||1)*(w.attacks||0); if(n>bn){bn=n;best=w;} });
+    var weapon={};
+    if(best){
+      weapon.a=(best.count||1)*(best.attacks||0); weapon.q=u.quality||4;
+      var srs=best.specialRules||[]; function sr(n){ for(var i=0;i<srs.length;i++) if((srs[i].name||'').toLowerCase()===n) return srs[i]; return null; }
+      var ap=sr('ap'); weapon.ap=ap?ap.rating:0; var bl=sr('blast'); if(bl) weapon.blast=bl.rating;
+      weapon.rending=!!sr('rending'); weapon.reliable=!!sr('reliable'); weapon.relentless=!!sr('relentless'); weapon.furious=!!sr('furious'); weapon.surge=!!sr('surge'); weapon.indirect=!!sr('indirect');
+    }
+    return { name:u.name, type:type, section:1, flags:flags, weapon:weapon, cost:u.cost };
+  }
+  function addOPRUnit(){ var as=$('narArmySel'), us=$('narUnitSel'); var uid=as&&as.value, ui=us&&us.value; if(!uid||ui===''||!ARMY[uid]) return; var u=ARMY[uid].units[parseInt(ui,10)]; if(u) addUnit(deriveOPR(u)); }
+
   var Q={
     OBJ:"Any objective still going spare that this lot could make for?",
     INWAY:"Anyone daft enough to be in their way — within 6 inches of the route?",
@@ -436,6 +472,7 @@
     $('narRound').textContent=state.round;
     $('narLeft').textContent = state.units.length ? (el.length+' of '+onT.length+' still to activate') : 'Add units first';
     $('narNext').disabled = !el.length;
+    renderPoints();
   }
   function buildIntro(sel){
     var head = sel.shifted ? ("Section "+sel.roll+"'s deserted — clockwise to section "+sel.sec+".") : ("Section "+sel.sec+".");
@@ -719,6 +756,9 @@
   load();
   $('narAdd').addEventListener('click',function(){ addUnit(); });
   $('narSample').addEventListener('click',loadSample);
+  loadArmyIndex();
+  if($('narArmySel')) $('narArmySel').addEventListener('change',function(){ loadArmy(this.value); });
+  if($('narAddUnit')) $('narAddUnit').addEventListener('click',addOPRUnit);
   $('narNext').addEventListener('click',startActivation);
   $('narNewRound').addEventListener('click',newRound);
   $('narObjMinus').addEventListener('click',function(){ setObjCount(state.objectives.length-1); });
