@@ -148,6 +148,39 @@
   .solo-tree ol{margin:6px 0 0}
   .solo-tree.homebrew{border-color:var(--warn)}
   .solo-tree.homebrew h3{color:var(--warn)}
+  /* ===== NPC Narrator (.nar-*) ===== */
+  .muted{color:var(--muted)} .small{font-size:13px}
+  .nar-unit{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin:8px 0}
+  .nar-unit.done{opacity:.5}
+  .nar-unit.shaken{border-color:var(--warn)}
+  .nar-row{display:flex;gap:6px;align-items:center}
+  .nar-name{flex:1;min-width:70px;padding:7px 8px;background:#0e1410;color:var(--ink);border:1px solid var(--line);border-radius:7px;font-size:14px}
+  .nar-sel{padding:7px 6px;background:#0e1410;color:var(--ink);border:1px solid var(--line);border-radius:7px;font-size:13px;-webkit-appearance:none;appearance:none}
+  .nar-sec{width:62px}
+  .nar-x{flex:0 0 auto;width:30px;height:30px;border:1px solid var(--line);background:#0e1410;color:var(--danger);border-radius:7px;cursor:pointer;font-weight:800}
+  .nar-flags{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:8px;font-size:12px;color:var(--muted)}
+  .nar-flags label{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+  .nar-flags .nar-shaken{color:var(--warn);font-weight:700}
+  .nar-btn{appearance:none;-webkit-appearance:none;cursor:pointer;font-size:14px;font-weight:800;color:#06120e;background:var(--acc);border:0;border-radius:9px;padding:10px 16px}
+  .nar-btn.ghost{background:#13201a;color:var(--acc);border:1px solid var(--line)}
+  .nar-go{width:100%;font-size:16px;padding:14px;margin:10px 0 0;border-radius:12px}
+  .nar-go:disabled{opacity:.45;cursor:default}
+  .nar-roundbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}
+  .nar-roundbar b{color:var(--acc);font-size:16px}
+  .nar-stage{background:#0e1712;border:1px solid var(--acc);border-radius:12px;padding:14px;margin:10px 0;min-height:40px}
+  .nar-intro{margin:0 0 6px;font-size:13px;color:var(--acc2);font-weight:700}
+  .nar-q{margin:0 0 10px;font-size:16px;color:var(--ink);font-weight:600}
+  .nar-yn{display:flex;gap:10px}
+  .nar-yn .nar-btn{flex:1}
+  .nar-action{margin:0;font-size:17px;font-weight:800;color:var(--acc)}
+  .nar-extra{margin:9px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}
+  .nar-extra li{margin:4px 0}
+  .nar-msg{margin:0;color:var(--muted);font-size:14px}
+  .nar-mic2{margin:8px 0 0;width:100%;background:#13201a;color:var(--acc);border:1px solid var(--line);border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer}
+  .nar-mic2.listening{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .nar-log{margin:12px 0 0}
+  .nar-logitem{font-size:13px;color:var(--ink);padding:4px 0;border-bottom:1px solid var(--line)}
+  .nar-logsep{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--acc2);text-transform:uppercase;margin:10px 0 2px}
 </style>
 </head>
 <body>
@@ -164,6 +197,7 @@
   <button data-tab="cards">Cards</button>
   <button data-tab="video">Video</button>
   <button data-tab="solo">Solo AI</button>
+  <button data-tab="narrator">Narrator</button>
 </nav>
 
 <main>
@@ -683,6 +717,33 @@
   </section>
 </div>
 
+<!-- ============ TAB 7: NPC NARRATOR ============ -->
+<div id="narrator" class="tab">
+  <section class="unit">
+    <h2>🎲 NPC Narrator</h2>
+    <p class="muted small" style="margin-top:0">Runs the AI opponent's turn and narrates it aloud. Set the AI army once (it saves on this device), then tap <strong>Next AI Activation</strong> each AI turn — it rolls the section, picks a random unit, walks its decision tree (you answer a board question or two it can't see, by tap or voice), and tells you exactly what the AI does. Uses the v3.5 Solo &amp; Co-Op AI.</p>
+  </section>
+
+  <section class="unit">
+    <h2>AI Army</h2>
+    <div id="narUnits"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button id="narAdd" class="nar-btn ghost">+ Add unit</button>
+      <button id="narSample" class="nar-btn ghost">Load HDF sample</button>
+    </div>
+    <p class="muted small">Type sets the decision tree. Flags change behaviour (Artillery, Aircraft, Caster, Ambush, Scout, Counter, Fast). Tick <em>Shaken</em> during play — Shaken units activate last and just recover.</p>
+  </section>
+
+  <section class="unit">
+    <h2>Run the AI Turn</h2>
+    <div class="nar-roundbar"><span>Round <b id="narRound">1</b></span><button id="narNewRound" class="nar-btn ghost">New round</button><span id="narLeft" class="muted small"></span></div>
+    <button id="narNext" class="nar-btn nar-go">▶ Next AI Activation</button>
+    <button id="narMic" class="nar-mic2">🎤 Voice — say “next”, then answer “yes” / “no”</button>
+    <div id="narStage" class="nar-stage"></div>
+    <div id="narLog" class="nar-log"></div>
+  </section>
+</div>
+
 </main>
 
 <footer>
@@ -929,6 +990,220 @@ function renderStrat(){
       }catch(err){ statusEl.textContent='Could not start the mic, tap a button below instead.'; }
     });
   }
+})();
+
+// ---- NPC Narrator (deterministic AI-turn driver + TTS) ----
+(function(){
+  var root=document.getElementById('narrator');
+  if(!root) return;
+  var $=function(id){return document.getElementById(id);};
+
+  function speak(t){ if(!('speechSynthesis' in window)||!t) return; try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=1; speechSynthesis.speak(u);}catch(e){} }
+  var warmed=false; function warm(){ if(warmed||!('speechSynthesis' in window))return; try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);warmed=true;}catch(e){} }
+
+  var RULE={
+    aircraft:"Aircraft: only Advances, +30\" in a straight line ignoring terrain and units; can't seize/contest, can't be charged.",
+    artillery:"Artillery: may only Hold; +1 to hit when shooting over 9\".",
+    caster:"Caster: before attacking, roll a random spell (D3 + level); on 4+ resolve on a target in line of sight.",
+    counter:"Counter: activates after its section's non-Counter units; strikes first when charged."
+  };
+  var KEYNAMES={shooting:'Shooting',hybrid:'Hybrid',melee:'Melee'};
+
+  var state={round:1,seq:0,units:[]};
+  var LSK='oprNarratorArmy';
+  function save(){ try{ localStorage.setItem(LSK, JSON.stringify(state)); }catch(e){} }
+  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state=p; if(!state.seq) state.seq=state.units.length; } } }catch(e){} }
+  function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
+  function onTable(u){ return !(u.flags.ambush && state.round<2); }
+
+  function pushUnit(d){ d=d||{}; state.units.push({id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}); }
+  function addUnit(d){ pushUnit(d); save(); renderArmy(); renderPlay(); }
+  function removeUnit(id){ state.units=state.units.filter(function(u){return u.id!==id;}); save(); renderArmy(); renderPlay(); }
+  function loadSample(){ state.units=[]; state.round=1; state.seq=0;
+    pushUnit({name:'Battle Brothers',type:'shooting',section:1,flags:{}});
+    pushUnit({name:'Heavy Weapons Team',type:'shooting',section:2,flags:{artillery:true}});
+    pushUnit({name:'Assault Troopers',type:'hybrid',section:2,flags:{fast:true}});
+    pushUnit({name:'Captain (Hero)',type:'hybrid',section:3,flags:{counter:true}});
+    save(); renderArmy(); renderPlay(); $('narLog').innerHTML=''; stageMsg('HDF sample loaded. Tap “Next AI Activation”.');
+  }
+
+  var FLAGS=[['ambush','Ambush'],['scout','Scout'],['artillery','Artillery'],['caster','Caster'],['aircraft','Aircraft'],['counter','Counter'],['fast','Fast']];
+
+  function renderArmy(){
+    var box=$('narUnits'); box.innerHTML='';
+    if(!state.units.length){ box.innerHTML='<p class="muted small">No units yet — add the AI opponent\'s units, or load the HDF sample.</p>'; return; }
+    state.units.forEach(function(u){
+      var card=document.createElement('div'); card.className='nar-unit'+(u.activated?' done':'')+(u.shaken?' shaken':'');
+      var r1=document.createElement('div'); r1.className='nar-row';
+      var nm=document.createElement('input'); nm.type='text'; nm.value=u.name; nm.className='nar-name'; nm.addEventListener('input',function(){u.name=nm.value;save();});
+      var ty=document.createElement('select'); ty.className='nar-sel'; ['shooting','hybrid','melee'].forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=KEYNAMES[t];if(u.type===t)o.selected=true;ty.appendChild(o);}); ty.addEventListener('change',function(){u.type=ty.value;save();});
+      var se=document.createElement('select'); se.className='nar-sel nar-sec'; [1,2,3].forEach(function(n){var o=document.createElement('option');o.value=String(n);o.textContent='Sec '+n;if(u.section==n)o.selected=true;se.appendChild(o);}); se.addEventListener('change',function(){u.section=parseInt(se.value,10);save();});
+      var rm=document.createElement('button'); rm.className='nar-x'; rm.textContent='✕'; rm.title='Remove'; rm.addEventListener('click',function(){removeUnit(u.id);});
+      r1.appendChild(nm); r1.appendChild(ty); r1.appendChild(se); r1.appendChild(rm);
+      var r2=document.createElement('div'); r2.className='nar-flags';
+      FLAGS.forEach(function(f){ var lab=document.createElement('label'); var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!u.flags[f[0]]; cb.addEventListener('change',function(){u.flags[f[0]]=cb.checked;save();renderPlay();}); lab.appendChild(cb); lab.appendChild(document.createTextNode(f[1])); r2.appendChild(lab); });
+      var sh=document.createElement('label'); sh.className='nar-shaken'; var scb=document.createElement('input'); scb.type='checkbox'; scb.checked=!!u.shaken; scb.addEventListener('change',function(){u.shaken=scb.checked;save();renderArmy();renderPlay();}); sh.appendChild(scb); sh.appendChild(document.createTextNode('Shaken')); r2.appendChild(sh);
+      card.appendChild(r1); card.appendChild(r2); box.appendChild(card);
+    });
+  }
+
+  var Q={
+    OBJ:"Is there an objective the AI does NOT control that this unit could move toward?",
+    INWAY:"Is an enemy 'in the way' — within 6 inches of the path to that objective?",
+    CHGWAY:"Can this unit reach that enemy with a Charge? (12 inches, or 16 if Fast)",
+    RUSHONLY:"Is the objective in Rush range (12 or 16) but NOT Advance range (6 or 8)?",
+    ADVOBJ:"After Advancing toward the objective, will an enemy be in shooting range?",
+    ENCHG:"Is an enemy in Charge range now?",
+    ADVEN:"After Advancing toward the nearest enemy, will it be in shooting range?",
+    INRANGE:"Is an enemy in this unit's shooting range?"
+  };
+  function act(t,k){ return {action:t,kind:k||null}; }
+  function ask(k){ return {ask:k,q:Q[k]}; }
+  function treeShooting(u,a){
+    if(a.OBJ===undefined) return ask('OBJ');
+    if(a.OBJ){ if(a.ADVOBJ===undefined) return ask('ADVOBJ'); return a.ADVOBJ?act("Advance toward the objective and shoot.",'shoot'):act("Rush toward the objective."); }
+    if(a.ADVEN===undefined) return ask('ADVEN'); return a.ADVEN?act("Advance toward the nearest enemy and shoot.",'shoot'):act("Rush toward the nearest enemy.");
+  }
+  function treeHybrid(u,a){
+    if(a.OBJ===undefined) return ask('OBJ');
+    if(a.OBJ){
+      if(a.INWAY===undefined) return ask('INWAY');
+      if(a.INWAY){ if(a.CHGWAY===undefined) return ask('CHGWAY'); if(a.CHGWAY) return act("Charge the enemy in the way.",'charge'); if(a.ADVOBJ===undefined) return ask('ADVOBJ'); return a.ADVOBJ?act("Advance toward the objective and shoot.",'shoot'):act("Rush toward the objective."); }
+      if(a.RUSHONLY===undefined) return ask('RUSHONLY'); if(a.RUSHONLY) return act("Rush toward the objective."); if(a.ADVOBJ===undefined) return ask('ADVOBJ'); return a.ADVOBJ?act("Advance toward the objective and shoot.",'shoot'):act("Rush toward the objective.");
+    }
+    if(a.ENCHG===undefined) return ask('ENCHG'); if(a.ENCHG) return act("Charge the nearest enemy.",'charge'); if(a.ADVEN===undefined) return ask('ADVEN'); return a.ADVEN?act("Advance toward the nearest enemy and shoot.",'shoot'):act("Rush toward the nearest enemy.");
+  }
+  function treeMelee(u,a){
+    if(a.OBJ===undefined) return ask('OBJ');
+    if(a.OBJ){ if(a.INWAY===undefined) return ask('INWAY'); if(a.INWAY){ if(a.CHGWAY===undefined) return ask('CHGWAY'); return a.CHGWAY?act("Charge the enemy in the way.",'charge'):act("Rush toward the objective."); } return act("Rush toward the objective."); }
+    if(a.ENCHG===undefined) return ask('ENCHG'); return a.ENCHG?act("Charge the nearest enemy.",'charge'):act("Rush toward the nearest enemy.");
+  }
+  function treeArtillery(u,a){ if(a.INRANGE===undefined) return ask('INRANGE'); return a.INRANGE?act("Hold and shoot the nearest valid target.",'shoot'):act("Hold position — no enemy in range."); }
+  function treeFor(u){ if(u.flags.artillery) return treeArtillery; if(u.flags.aircraft) return treeShooting; return ({shooting:treeShooting,hybrid:treeHybrid,melee:treeMelee})[u.type]||treeHybrid; }
+
+  function eligible(){ return state.units.filter(function(u){return !u.activated && onTable(u);}); }
+  function selectFromRoll(roll){
+    var pool=eligible(); if(!pool.length) return null;
+    var nonShaken=pool.filter(function(u){return !u.shaken;});
+    var active=nonShaken.length?nonShaken:pool;
+    var order=[roll, roll%3+1, (roll+1)%3+1], sec=null;
+    for(var i=0;i<order.length;i++){ if(active.some(function(u){return u.section===order[i];})){ sec=order[i]; break; } }
+    if(sec===null) sec=active[0].section;
+    var cand=active.filter(function(u){return u.section===sec;});
+    var nonCounter=cand.filter(function(u){return !u.flags.counter;});
+    return {candidates:(nonCounter.length?nonCounter:cand), sec:sec, roll:roll, shifted:(roll!==sec), shakenOnly:!nonShaken.length};
+  }
+  function pickUnit(){ var s=selectFromRoll(Math.floor(Math.random()*3)+1); if(!s) return null; s.unit=s.candidates[Math.floor(Math.random()*s.candidates.length)]; return s; }
+
+  var cur=null, ans={}, pendKey=null;
+
+  function renderPlay(){
+    var onT=state.units.filter(onTable); var el=eligible();
+    $('narRound').textContent=state.round;
+    $('narLeft').textContent = state.units.length ? (el.length+' of '+onT.length+' still to activate') : 'Add units first';
+    $('narNext').disabled = !el.length;
+  }
+  function startActivation(){
+    warm(); pendKey=null;
+    var sel=pickUnit();
+    if(!sel){ stageMsg("All AI units have activated this round. Tap “New round”."); speak("All units have activated. Start a new round."); return; }
+    cur=sel.unit; ans={};
+    var intro="Section "+sel.roll+(sel.shifted?(" — empty, clockwise to section "+sel.sec):"")+". "+cur.name+", "+KEYNAMES[cur.type]+" unit.";
+    if(sel.shakenOnly && cur.shaken){ finishShaken(intro); return; }
+    renderStep(intro);
+  }
+  function finishShaken(intro){
+    var msg=cur.name+" is Shaken — it stays idle to recover, and stops being Shaken at the end of this activation.";
+    cur.activated=true; cur.shaken=false; save(); renderArmy();
+    stageResult(intro, msg, []); logAdd(cur.name+": Shaken — idle (recovers)."); speak(intro+" "+msg);
+    cur=null; renderPlay();
+  }
+  function ruleNotes(u){ var n=[]; if(u.flags.aircraft)n.push(RULE.aircraft); if(u.flags.artillery)n.push(RULE.artillery); if(u.flags.caster)n.push(RULE.caster); if(u.flags.counter)n.push(RULE.counter); return n; }
+  function renderStep(intro){
+    var r=treeFor(cur)(cur,ans);
+    if(r.ask){ pendKey=r.ask; stageQuestion(intro, r.q, r.ask); speak((intro?intro+" ":"")+r.q); }
+    else { finishAction(intro, r); }
+  }
+  function finishAction(intro, r){
+    pendKey=null;
+    var extra=[];
+    if(cur.flags.aircraft) extra.push("Moves 30 inches (Aircraft).");
+    if(r.kind==='shoot') extra.push("Target the nearest valid enemy — prefer one not yet activated, and in the open over cover.");
+    if(r.kind==='charge') extra.push("Charge the nearest valid enemy — prefer one not yet activated; the AI strikes first.");
+    if(cur.flags.caster) extra.push("Then cast: roll D3 + caster level for a random spell (4+ to resolve, target in line of sight).");
+    var notes=ruleNotes(cur);
+    cur.activated=true; save(); renderArmy();
+    stageResult(intro, r.action, extra.concat(notes)); logAdd(cur.name+": "+r.action);
+    speak((intro?intro+" ":"")+r.action+" "+extra.join(' '));
+    cur=null; renderPlay();
+  }
+
+  function esc(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function stageMsg(t){ $('narStage').innerHTML='<p class="nar-msg">'+esc(t)+'</p>'; pendKey=null; }
+  function stageQuestion(intro,q,key){
+    var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
+    h+='<p class="nar-q">'+esc(q)+'</p><div class="nar-yn"><button class="nar-btn" data-yn="1">Yes</button><button class="nar-btn ghost" data-yn="0">No</button></div>';
+    var st=$('narStage'); st.innerHTML=h;
+    Array.prototype.forEach.call(st.querySelectorAll('[data-yn]'),function(b){ b.addEventListener('click',function(){ answerQuestion(b.getAttribute('data-yn')==='1'); }); });
+  }
+  function answerQuestion(val){ if(!pendKey)return; ans[pendKey]=val; renderStep(''); }
+  function stageResult(intro, action, extras){
+    var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
+    h+='<p class="nar-action">▶ '+esc(action)+'</p>';
+    if(extras&&extras.length){ h+='<ul class="nar-extra">'; extras.forEach(function(e){h+='<li>'+esc(e)+'</li>';}); h+='</ul>'; }
+    $('narStage').innerHTML=h;
+  }
+  function logAdd(t){ var l=$('narLog'); var p=document.createElement('div'); p.className='nar-logitem'; p.textContent='R'+state.round+' • '+t; l.insertBefore(p,l.firstChild); }
+  function newRound(){
+    state.round++; state.units.forEach(function(u){u.activated=false;}); save(); renderArmy();
+    var msgs=['Round '+state.round+'.'];
+    if(state.round===2 && state.units.some(function(u){return u.flags.ambush;})) msgs.push('Deploy Ambush units now, over 9 inches from enemies.');
+    msgs.push('Challenge bonus: if the AI holds as many objectives as you, +1 to hit this round; if fewer, +1 to hit and +1 Defense.');
+    stageMsg(msgs.join(' ')); speak(msgs.join(' ')); renderPlay();
+    var l=$('narLog'); var hr=document.createElement('div'); hr.className='nar-logsep'; hr.textContent='— Round '+state.round+' —'; l.insertBefore(hr,l.firstChild);
+  }
+
+  // context-aware push-to-talk mic
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition; var rec=null, listening=false;
+  function handleVoice(t){
+    t=(t||'').toLowerCase();
+    if(pendKey){
+      if(/\b(yes|yeah|yep|yup|affirmative|correct|true|it does|there is|i can|can reach)\b/.test(t)) answerQuestion(true);
+      else if(/\b(no|nope|nah|negative|false|cannot|can'?t|there is ?n'?t|is ?n'?t|none)\b/.test(t)) answerQuestion(false);
+      else speak("Please say yes or no.");
+    } else {
+      if(/\b(next|activate|activation|go|continue|run|who)\b/.test(t)) startActivation();
+      else if(/\b(new round|next round|end round|new turn)\b/.test(t)) newRound();
+      else speak("Say next, or new round.");
+    }
+  }
+  function wireMic(){
+    var mic=$('narMic'); if(!mic) return;
+    if(!SR){ mic.textContent="Voice not supported here — use the buttons"; mic.disabled=true; mic.style.opacity=.5; return; }
+    mic.addEventListener('click',function(){
+      warm();
+      if(listening){ try{rec.stop();}catch(e){} return; }
+      try{
+        rec=new SR(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=1; rec.continuous=false;
+        rec.onstart=function(){ listening=true; mic.classList.add('listening'); mic.textContent='🎙️ Listening…'; };
+        rec.onerror=function(){};
+        rec.onend=function(){ listening=false; mic.classList.remove('listening'); mic.textContent='🎤 Voice — say “next”, then answer “yes” / “no”'; };
+        rec.onresult=function(e){ var t=''; for(var i=0;i<e.results.length;i++){ t+=e.results[i][0].transcript; } handleVoice(t); };
+        rec.start();
+      }catch(err){}
+    });
+  }
+
+  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible}; // self-test
+
+  load();
+  $('narAdd').addEventListener('click',function(){ addUnit(); });
+  $('narSample').addEventListener('click',loadSample);
+  $('narNext').addEventListener('click',startActivation);
+  $('narNewRound').addEventListener('click',newRound);
+  wireMic();
+  renderArmy(); renderPlay();
+  stageMsg(state.units.length?'Tap “Next AI Activation” to run the AI turn.':'Add the AI army (or load the HDF sample), then tap “Next AI Activation”.');
 })();
 </script>
 </body>
