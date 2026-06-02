@@ -95,6 +95,8 @@
   .nar-tally{font-size:13px;color:var(--acc);font-weight:700;margin:2px 0 0}
   .nar-tally .miss{color:var(--muted);font-weight:600}
   .nar-num2{width:64px;padding:8px;background:#0e1410;color:var(--ink);border:1px solid var(--acc);border-radius:8px;font-size:16px;text-align:center}
+  .nar-report{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:11px 0 0;padding:9px 10px;background:rgba(226,162,59,.10);border:1px dashed var(--warn);border-radius:9px;font-size:13px;color:var(--ink)}
+  .nar-react{margin:10px 0 0;font-size:15px;font-weight:800;color:var(--acc);line-height:1.4}
 </style>
 </head>
 <body>
@@ -164,8 +166,8 @@
   var warmed=false; function warm(){ if(warmed||!('speechSynthesis' in window))return; try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);warmed=true;}catch(e){} }
 
   // ---------- ElevenLabs pre-rendered clips (random per context; falls back to Web Speech) ----------
-  var AUD={ base:'audio/', clips:null, banks:null, ranges:{}, ready:false, cur:null };
-  (function loadManifest(){ try{ fetch(AUD.base+'manifest.json').then(function(r){ return r.ok?r.json():null; }).then(function(m){ if(m){ AUD.clips=m.clips||{}; AUD.banks=m.banks||{}; AUD.ranges=m.ranges||{}; AUD.ready=true; } }).catch(function(){}); }catch(e){} })();
+  var AUD={ base:'audio/', clips:null, banks:null, ranges:{}, numWords:[], ready:false, cur:null };
+  (function loadManifest(){ try{ fetch(AUD.base+'manifest.json').then(function(r){ return r.ok?r.json():null; }).then(function(m){ if(m){ AUD.clips=m.clips||{}; AUD.banks=m.banks||{}; AUD.ranges=m.ranges||{}; AUD.numWords=m.numWords||[]; AUD.ready=true; } }).catch(function(){}); }catch(e){} })();
   function clipId(id){ if(!AUD.ready||!id) return false; if(AUD.clips&&Object.prototype.hasOwnProperty.call(AUD.clips,id)) return true; var m; if((m=/^num_(\d+)$/.exec(id))) return (+m[1])<=(AUD.ranges.num||0); if((m=/^round_(\d+)$/.exec(id))) return (+m[1])>=1&&(+m[1])<=(AUD.ranges.round||0); if((m=/^section_(\d+)$/.exec(id))) return (+m[1])>=1&&(+m[1])<=(AUD.ranges.section||0); return false; }
   function pickBank(b){ var a=AUD.banks&&AUD.banks[b]; if(!a||!a.length) return null; return a[Math.floor(Math.random()*a.length)]; }
   function stopAll(){ try{ if(AUD.cur){ AUD.cur.onended=null; AUD.cur.onerror=null; AUD.cur.pause(); AUD.cur=null; } }catch(e){} if('speechSynthesis' in window){ try{ speechSynthesis.cancel(); }catch(e){} } }
@@ -178,7 +180,8 @@
   }
   function say(text, opts, ids){ if(ids&&ids.length){ playClips(ids, text, opts); } else { speak(text, opts); } }
   function introIds(sel){ return ['section_'+sel.sec, 'typein_'+sel.unit.type]; }
-  function diceClipIds(hitRes){ if(!hitRes||!hitRes.rolls) return []; var s=hitRes.rolls.length, h=hitRes.hits; var tier=(h===0)?'dice_zero':((s>0&&h/s>=0.5)?'dice_high':'dice_low'); return ['num_'+s,'w_shots','num_'+h,'w_hits',pickBank(tier)]; }
+  function numWord(n){ var w=AUD.numWords; return (w&&w[n]!=null)?w[n]:String(n); }
+  function clipText(id){ if(!id) return ''; if(AUD.clips&&AUD.clips[id]!=null) return AUD.clips[id]; var m; if((m=/^num_(\d+)$/.exec(id))) return numWord(+m[1]); if((m=/^round_(\d+)$/.exec(id))) return 'Round '+numWord(+m[1])+'.'; if((m=/^section_(\d+)$/.exec(id))) return 'Section '+numWord(+m[1])+'.'; return ''; }
   // intro is folded into the FIRST spoken event of an activation (set in startActivation, consumed once)
   function consumeIntro(ids, text, opts){
     ids=(ids||[]).filter(function(x){return x;});
@@ -524,35 +527,49 @@
     else stageCombatYN(intro, step.q, advance);
     consumeIntro([], step.q, {pitch:1,rate:1});
   }
+  // What the AI legitimately knows about its OWN output (hits + AP + rending). Never the defender's odds.
+  function threatOf(weapon, res){
+    var ap=parseInt(weapon&&weapon.ap,10)||0;
+    var rend=(weapon&&weapon.rending)? res.rolls.filter(function(d){return d===6;}).length : 0;
+    var hits=res.hits;
+    var tier=(hits===0)?'whiff':((ap>=2||rend>0||hits>=6)?'heavy':((hits<=2&&ap===0)?'light':'medium'));
+    var bits=[hits+' hit'+(hits===1?'':'s')]; if(ap>0)bits.push('AP'+ap); if(rend>0)bits.push(rend+' rending');
+    return {ap:ap, rend:rend, hits:hits, tier:tier, text:bits.join(' · ')};
+  }
+  // Player rolled their own saves (paper) and reports models lost -> the AI reacts + flags morale. We never roll your saves.
+  function reactToDamage(lost, hits){
+    lost=Math.max(0, parseInt(lost,10)||0);
+    var tier=(lost<=0)?'none':((lost>=3||lost>=Math.ceil(hits/2))?'heavy':'some');
+    var rid=pickBank('react_'+tier);
+    var ids=(lost<=0)?[rid]:['num_'+lost,'w_down',rid];
+    var st=$('narStage'); if(st){ var rr=st.querySelector('.nar-report'); if(rr&&rr.parentNode) rr.parentNode.removeChild(rr);
+      var p=document.createElement('p'); p.className='nar-react'; p.textContent='▸ '+(lost>0? numWord(lost)+' down. ':'')+clipText(rid)+(lost>0?' — test their morale if that’s half the unit or worse.':''); st.appendChild(p); }
+    logAdd('  ↳ '+lost+' model'+(lost===1?'':'s')+' lost');
+    say((lost>0? numWord(lost)+' down. ':'')+clipText(rid), {pitch:0.86,rate:0.95}, ids);
+  }
   function finalizeAction(intro, r, hitRes){
     var u=cur;
     var head=rnd(LINES[r.id]||["{u} act."]).replace(/\{u\}/g,u.name);
     var extra=[];
     if(objAuto) extra.push(objAuto);
     if(u.flags.aircraft) extra.push("Moves 30\" in a straight line (Aircraft).");
-    if(r.kind==='shoot') extra.push("Target: the nearest valid enemy — you pick it, preferring not-yet-activated and in the open over cover; then apply AP / Deadly / Takedown / Unstoppable overrides.");
-    if(r.kind==='charge') extra.push("Charge: the nearest valid enemy — you pick it, preferring not-yet-activated; the AI strikes first.");
-    if(u.flags.caster) extra.push("Then cast: roll D3 + caster level for a random spell (4+ to resolve, target in line of sight).");
-    var notes=ruleNotes(u);
-    if(hitRes) notes=notes.concat(hitRes.notes);
-    var verdictTxt=(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head+(hitRes? ' '+hitVerdict(hitRes).spoken : '');
+    if(r.kind==='shoot') extra.push("Target: the nearest valid enemy — you pick it (not-yet-activated, open over cover); AP→best Defense, Deadly→Tough, Takedown→heroes.");
+    if(r.kind==='charge') extra.push("Charge: the nearest valid enemy — you pick it; the AI strikes first.");
+    if(u.flags.caster) extra.push("Then cast: roll D3 + caster level for a random spell (4+, target in line of sight).");
+    var notes=ruleNotes(u); if(hitRes) notes=notes.concat(hitRes.notes);
+    var th=hitRes? threatOf(u.weapon, hitRes) : null;
+    var menaceId = th ? (th.hits===0? pickBank('whiff') : pickBank('menace_'+th.tier)) : null;
     var vids=[]; if(curLast){ var ls=pickBank('laststand'); if(ls) vids.push(ls); }
     var av=pickBank('act_'+r.id); if(av) vids.push(av);
-    if(hitRes) vids=vids.concat(diceClipIds(hitRes));
+    if(th){ if(th.hits>0){ vids.push('num_'+th.hits,'w_hits'); } if(menaceId) vids.push(menaceId); }
+    var verdictTxt=(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head+(th&&th.hits>0? ' '+numWord(th.hits)+' hits.':'')+(menaceId? ' '+clipText(menaceId):'');
+    var hits = th? th.hits : 0;
     u.activated=true; save(); renderArmy();
     if(r.kind==='charge') sting();
-    stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes);
-    logAdd(u.name+": "+r.action+(hitRes?(' ['+hitRes.hits+' hit'+(hitRes.hits===1?'':'s')+']'):''));
+    stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes, th, (hits>0? function(lost){ reactToDamage(lost, hits); } : null));
+    logAdd(u.name+": "+r.action+(th?(' ['+hits+' hit'+(hits===1?'':'s')+']'):''));
     consumeIntro(vids, verdictTxt, {pitch:0.86,rate:0.93});
     cur=null; curLast=false; renderPlay();
-  }
-  // Witty British verdict for the dice result (narration only — saves are the player's).
-  function hitVerdict(res){
-    var shots=res.rolls.length, h=res.hits;
-    var word=function(n){ var w=['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve']; return (n>=0&&n<w.length)?w[n]:String(n); };
-    var shotsTxt=word(shots)+' shot'+(shots===1?'':'s');
-    var hitsTxt=(h===0)?'not a single hit. How embarrassing.':(word(h)+' hit'+(h===1?'':'s')+'!');
-    return {spoken:shotsTxt.charAt(0).toUpperCase()+shotsTxt.slice(1)+'… '+hitsTxt, text:shotsTxt+' → '+(h===0?'0 hits':word(h)+' hit'+(h===1?'':'s'))};
   }
 
   // ---------- stage rendering ----------
@@ -596,18 +613,19 @@
     h+='</div>';
     return h;
   }
-  function stageResult(intro, headline, mech, extras, last, hitRes){
+  function stageResult(intro, headline, mech, extras, last, hitRes, th, onReport){
     var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
     if(last) h+='<p class="nar-last">LAST STAND</p>';
     h+='<p class="nar-action">▶ '+esc(headline)+'</p>';
     if(hitRes && hitRes.rolls && hitRes.rolls.length){
       h+=diceHTML(hitRes, hitRes._disp||{});
-      var v=hitVerdict(hitRes);
-      h+='<p class="nar-tally">'+esc(v.text)+(hitRes.hits===0?' <span class="miss">(saves? none needed)</span>':'')+'</p>';
+      if(th) h+='<p class="nar-tally">'+esc(th.text)+(th.hits===0?' <span class="miss">— a clean miss</span>':'')+'</p>';
     }
     if(mech) h+='<p class="nar-mech"><b>Rules:</b> '+esc(mech)+'</p>';
     if(extras&&extras.length){ h+='<ul class="nar-extra">'; extras.forEach(function(e){h+='<li>'+esc(e)+'</li>';}); h+='</ul>'; }
-    $('narStage').innerHTML=h;
+    if(onReport && th && th.hits>0){ h+='<div class="nar-report">After your saves — models lost? <input type="number" min="0" max="99" step="1" class="nar-num2" id="narLostIn" inputmode="numeric" value="0"><button class="nar-btn" id="narLostOk">OK</button></div>'; }
+    var st=$('narStage'); st.innerHTML=h;
+    if(onReport && th && th.hits>0){ var ok=$('narLostOk'), inp=$('narLostIn'); var go=function(){ onReport(parseInt(inp&&inp.value,10)||0); }; if(ok) ok.addEventListener('click',go); if(inp) inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
   }
   function logAdd(t){ var l=$('narLog'); var p=document.createElement('div'); p.className='nar-logitem'; p.textContent='R'+state.round+' • '+t; l.insertBefore(p,l.firstChild); }
   // Witty Challenge-Bonus threat, DERIVED from the objective chips. Soft generic line if HUD untouched.
