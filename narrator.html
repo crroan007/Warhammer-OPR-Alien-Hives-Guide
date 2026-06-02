@@ -54,8 +54,47 @@
   .nar-log{margin:12px 0 0}
   .nar-logitem{font-size:13px;color:var(--ink);padding:4px 0;border-bottom:1px solid var(--line)}
   .nar-logsep{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--acc2);text-transform:uppercase;margin:10px 0 2px}
+  /* objective HUD */
+  .nar-objbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0 2px}
+  .nar-objlbl{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--acc2);text-transform:uppercase}
+  .nar-objchips{display:flex;flex-wrap:wrap;gap:7px}
+  .nar-objchip{cursor:pointer;-webkit-appearance:none;appearance:none;font:inherit;font-size:12px;font-weight:700;line-height:1.1;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:#0e1410;color:var(--muted);min-width:62px;text-align:center}
+  .nar-objchip .nar-objstate{display:block;font-size:10px;font-weight:800;letter-spacing:.5px;margin-top:1px;opacity:.85}
+  .nar-objchip.mine{border-color:var(--acc2);color:var(--acc2)}
+  .nar-objchip.ai{border-color:var(--danger);color:var(--danger)}
+  .nar-objcount{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+  .nar-objcount button{cursor:pointer;-webkit-appearance:none;appearance:none;width:26px;height:26px;border:1px solid var(--line);background:#0e1410;color:var(--acc);border-radius:7px;font-weight:800;font-size:14px;line-height:1}
+  .nar-objcount button:disabled{opacity:.35;cursor:default}
   footer{max-width:760px;margin:0 auto;padding:18px 14px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
   footer a{color:var(--acc2)}
+  /* weapon profile (per-unit, optional) */
+  .nar-profrow{margin-top:7px}
+  .nar-proftoggle{appearance:none;-webkit-appearance:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--acc2);background:#13201a;border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+  .nar-proftoggle[aria-expanded="true"]{color:#06120e;background:var(--acc2);border-color:var(--acc2)}
+  .nar-prof{margin-top:8px;padding:8px 9px;background:#0e1712;border:1px dashed var(--line);border-radius:8px}
+  .nar-prof.hidden{display:none}
+  .nar-profstats{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+  .nar-profstats label{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+  .nar-num{width:52px;padding:6px 6px;background:#0e1410;color:var(--ink);border:1px solid var(--line);border-radius:7px;font-size:13px;text-align:center}
+  .nar-profflags{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:8px;font-size:12px;color:var(--muted)}
+  .nar-profflags label{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+  /* dice pips on stage */
+  .nar-dice{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 2px}
+  .nar-die{position:relative;width:30px;height:30px;border-radius:7px;background:#0e1410;border:1px solid var(--line);display:inline-grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:4px;gap:1px}
+  .nar-die.hit{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+  .nar-die.crit{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2) inset}
+  .nar-die.miss{opacity:.55}
+  .nar-die i{display:block;align-self:center;justify-self:center;width:5px;height:5px;border-radius:50%;background:var(--muted)}
+  .nar-die.hit i{background:var(--acc)} .nar-die.crit i{background:var(--acc2)}
+  .nar-die.p1 i:nth-child(1){grid-area:2/2}
+  .nar-die.p2 i:nth-child(1){grid-area:1/1} .nar-die.p2 i:nth-child(2){grid-area:3/3}
+  .nar-die.p3 i:nth-child(1){grid-area:1/1} .nar-die.p3 i:nth-child(2){grid-area:2/2} .nar-die.p3 i:nth-child(3){grid-area:3/3}
+  .nar-die.p4 i:nth-child(1){grid-area:1/1} .nar-die.p4 i:nth-child(2){grid-area:1/3} .nar-die.p4 i:nth-child(3){grid-area:3/1} .nar-die.p4 i:nth-child(4){grid-area:3/3}
+  .nar-die.p5 i:nth-child(1){grid-area:1/1} .nar-die.p5 i:nth-child(2){grid-area:1/3} .nar-die.p5 i:nth-child(3){grid-area:2/2} .nar-die.p5 i:nth-child(4){grid-area:3/1} .nar-die.p5 i:nth-child(5){grid-area:3/3}
+  .nar-die.p6 i:nth-child(1){grid-area:1/1} .nar-die.p6 i:nth-child(2){grid-area:1/3} .nar-die.p6 i:nth-child(3){grid-area:2/1} .nar-die.p6 i:nth-child(4){grid-area:2/3} .nar-die.p6 i:nth-child(5){grid-area:3/1} .nar-die.p6 i:nth-child(6){grid-area:3/3}
+  .nar-tally{font-size:13px;color:var(--acc);font-weight:700;margin:2px 0 0}
+  .nar-tally .miss{color:var(--muted);font-weight:600}
+  .nar-num2{width:64px;padding:8px;background:#0e1410;color:var(--ink);border:1px solid var(--acc);border-radius:8px;font-size:16px;text-align:center}
 </style>
 </head>
 <body>
@@ -85,6 +124,12 @@
     <div class="nar-roundbar"><span>Round <b id="narRound">1</b></span><button id="narNewRound" class="nar-btn ghost">New round</button><span id="narLeft" class="muted small"></span></div>
     <button id="narNext" class="nar-btn nar-go">▶ Next AI Activation</button>
     <button id="narMic" class="nar-mic2">🎤 Voice — say “next”, then answer “yes” / “no”</button>
+    <div class="nar-objbar">
+      <span class="nar-objlbl">Objectives</span>
+      <div id="narObjChips" class="nar-objchips"></div>
+      <span class="nar-objcount">Count <button id="narObjMinus" type="button" title="Fewer objectives">−</button><b id="narObjN">3</b><button id="narObjPlus" type="button" title="More objectives">+</button></span>
+    </div>
+    <p class="muted small" style="margin:2px 0 0">Tap a marker to cycle <em>empty → yours → AI's</em>. The AI reads these: it claims the Challenge Bonus and stops asking about open objectives when you keep them current.</p>
     <div id="narStage" class="nar-stage"></div>
     <div id="narLog" class="nar-log"></div>
   </section>
@@ -141,21 +186,30 @@
   };
   var KEYNAMES={shooting:'Shooting',hybrid:'Hybrid',melee:'Melee'};
 
-  var state={round:1,seq:0,units:[]};
+  var OBJSTATES=['empty','mine','ai'];
+  function defaultObjectives(n){ n=n||3; var a=[],i; for(i=0;i<n;i++) a.push('empty'); return a; }
+  function sanitizeObjectives(arr){
+    if(!arr || !arr.length) return defaultObjectives(3);
+    var out=arr.map(function(s){ return OBJSTATES.indexOf(s)>=0 ? s : 'empty'; });
+    if(out.length<3) while(out.length<3) out.push('empty');
+    if(out.length>5) out=out.slice(0,5);
+    return out;
+  }
+  var state={round:1,seq:0,units:[],objectives:defaultObjectives(3)};
   var LSK='oprNarratorArmy';
   function save(){ try{ localStorage.setItem(LSK, JSON.stringify(state)); }catch(e){} }
-  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; } } }catch(e){} }
+  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; state.objectives=sanitizeObjectives(p.objectives); } } }catch(e){} }
   function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
   function onTable(u){ return !(u.flags.ambush && state.round<2); }
 
-  function pushUnit(d){ d=d||{}; state.units.push({id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}); }
+  function pushUnit(d){ d=d||{}; var u={id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}; if(d.weapon) u.weapon=d.weapon; state.units.push(u); }
   function addUnit(d){ pushUnit(d); save(); renderArmy(); renderPlay(); }
   function removeUnit(id){ state.units=state.units.filter(function(u){return u.id!==id;}); save(); renderArmy(); renderPlay(); }
   function loadSample(){ state.units=[]; state.round=1; state.seq=0;
-    pushUnit({name:'Battle Brothers',type:'shooting',section:1,flags:{}});
-    pushUnit({name:'Heavy Weapons Team',type:'shooting',section:2,flags:{artillery:true}});
-    pushUnit({name:'Assault Troopers',type:'hybrid',section:2,flags:{fast:true}});
-    pushUnit({name:'Captain (Hero)',type:'hybrid',section:3,flags:{counter:true}});
+    pushUnit({name:'Battle Brothers',type:'shooting',section:1,flags:{},weapon:{a:10,q:3,ap:1}});
+    pushUnit({name:'Heavy Weapons Team',type:'shooting',section:2,flags:{artillery:true},weapon:{a:3,q:4,ap:2,blast:3}});
+    pushUnit({name:'Assault Troopers',type:'hybrid',section:2,flags:{fast:true},weapon:{a:8,q:3,ap:1,furious:true}});
+    pushUnit({name:'Captain (Hero)',type:'hybrid',section:3,flags:{counter:true},weapon:{a:4,q:3,ap:1,rending:true}});
     save(); renderArmy(); renderPlay(); $('narLog').innerHTML=''; stageMsg('HDF sample mustered. Tap “Next AI Activation” and let us have at it.');
   }
 
@@ -175,8 +229,68 @@
       var r2=document.createElement('div'); r2.className='nar-flags';
       FLAGS.forEach(function(f){ var lab=document.createElement('label'); var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!u.flags[f[0]]; cb.addEventListener('change',function(){u.flags[f[0]]=cb.checked;save();renderPlay();}); lab.appendChild(cb); lab.appendChild(document.createTextNode(f[1])); r2.appendChild(lab); });
       var sh=document.createElement('label'); sh.className='nar-shaken'; var scb=document.createElement('input'); scb.type='checkbox'; scb.checked=!!u.shaken; scb.addEventListener('change',function(){u.shaken=scb.checked;save();renderArmy();renderPlay();}); sh.appendChild(scb); sh.appendChild(document.createTextNode('Shaken')); r2.appendChild(sh);
-      card.appendChild(r1); card.appendChild(r2); box.appendChild(card);
+      card.appendChild(r1); card.appendChild(r2);
+      // ---- optional weapon profile (collapsed unless already set) ----
+      var hasProf=!!(u.weapon && (u.weapon.a||u.weapon.q));
+      var pr=document.createElement('div'); pr.className='nar-profrow';
+      var tog=document.createElement('button'); tog.type='button'; tog.className='nar-proftoggle'; tog.textContent='⚔ profile'; tog.setAttribute('aria-expanded', hasProf?'true':'false');
+      var panel=document.createElement('div'); panel.className='nar-prof'+(hasProf?'':' hidden');
+      tog.addEventListener('click',function(){ var open=panel.classList.toggle('hidden')===false; tog.setAttribute('aria-expanded', open?'true':'false'); });
+      function ensureW(){ if(!u.weapon) u.weapon={a:0,q:0,ap:0}; return u.weapon; }
+      function numField(labelTxt,key,min,max){
+        var lab=document.createElement('label'); lab.appendChild(document.createTextNode(labelTxt));
+        var inp=document.createElement('input'); inp.type='number'; inp.className='nar-num'; inp.min=String(min); inp.max=String(max); inp.step='1';
+        inp.value=(u.weapon&&u.weapon[key]!=null&&u.weapon[key]!=='')?String(u.weapon[key]):'';
+        inp.addEventListener('input',function(){ var w=ensureW(); var v=parseInt(inp.value,10); w[key]=isNaN(v)?0:v; save(); });
+        lab.appendChild(inp); return lab;
+      }
+      var stats=document.createElement('div'); stats.className='nar-profstats';
+      stats.appendChild(numField('A','a',0,99));
+      stats.appendChild(numField('Quality','q',2,6));
+      stats.appendChild(numField('AP','ap',0,4));
+      stats.appendChild(numField('Blast','blast',0,12));
+      panel.appendChild(stats);
+      var pf=document.createElement('div'); pf.className='nar-profflags';
+      [['reliable','Reliable'],['relentless','Relentless'],['furious','Furious'],['surge','Surge'],['rending','Rending'],['indirect','Indirect']].forEach(function(f){
+        var lab=document.createElement('label'); var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!(u.weapon&&u.weapon[f[0]]);
+        cb.addEventListener('change',function(){ var w=ensureW(); w[f[0]]=cb.checked; save(); }); lab.appendChild(cb); lab.appendChild(document.createTextNode(f[1])); pf.appendChild(lab);
+      });
+      panel.appendChild(pf);
+      var hint=document.createElement('p'); hint.className='muted small'; hint.style.margin='7px 0 0'; hint.textContent='With A & Quality set, the narrator rolls to-hit by the rules (AP/Rending recorded for your save step). Leave blank to narrate only.';
+      panel.appendChild(hint);
+      pr.appendChild(tog); pr.appendChild(panel); card.appendChild(pr);
+      box.appendChild(card);
     });
+  }
+
+  // ---------- objective HUD (player-maintained board state) ----------
+  // Each chip cycles empty -> mine -> ai. Player owns this truth; the AI only DERIVES from it.
+  var OBJLABEL={empty:'OPEN',mine:'YOURS',ai:'AI'};
+  function aiObjectives(){ return state.objectives.filter(function(s){return s==='ai';}).length; }
+  function myObjectives(){ return state.objectives.filter(function(s){return s==='mine';}).length; }
+  // True once the player has begun tracking (any chip claimed by anyone). Untouched HUD = all 'empty'.
+  function objectivesTouched(){ return state.objectives.some(function(s){return s!=='empty';}); }
+  // Official Challenge rule: AI controls >= player -> +1 to hit; AI controls < player -> +1 to hit AND +1 to defence.
+  // Both branches grant +1 to hit, so the hit bonus applies whenever the HUD is tracked; the defence bonus is the
+  // extra kicker that only applies when the AI is BEHIND (controls fewer than the player).
+  function challengeHitBonus(){ return objectivesTouched() ? 1 : 0; }
+  function challengeDefBonus(){ return (objectivesTouched() && aiObjectives()<myObjectives()) ? 1 : 0; }
+  function cycleObjective(i){ var cur=state.objectives[i], n=OBJSTATES.indexOf(cur); state.objectives[i]=OBJSTATES[(n+1)%OBJSTATES.length]; save(); renderObjectives(); }
+  function setObjCount(n){ n=Math.max(3,Math.min(5,n)); var a=state.objectives.slice(0,n); while(a.length<n) a.push('empty'); state.objectives=a; save(); renderObjectives(); }
+  function renderObjectives(){
+    var box=$('narObjChips'); if(!box) return; box.innerHTML='';
+    state.objectives.forEach(function(s,i){
+      var b=document.createElement('button'); b.type='button';
+      b.className='nar-objchip'+(s==='mine'?' mine':'')+(s==='ai'?' ai':'');
+      b.innerHTML='Obj '+(i+1)+'<span class="nar-objstate">'+OBJLABEL[s]+'</span>';
+      b.title='Objective '+(i+1)+' — tap to cycle (open / yours / AI\'s)';
+      b.addEventListener('click',function(){ cycleObjective(i); });
+      box.appendChild(b);
+    });
+    var nEl=$('narObjN'); if(nEl) nEl.textContent=state.objectives.length;
+    var minus=$('narObjMinus'), plus=$('narObjPlus');
+    if(minus) minus.disabled=(state.objectives.length<=3);
+    if(plus) plus.disabled=(state.objectives.length>=5);
   }
 
   // ---------- decision trees (the legal logic — unchanged from the rules) ----------
@@ -214,6 +328,64 @@
   function treeArtillery(u,a){ if(a.INRANGE===undefined) return ask('INRANGE'); return a.INRANGE?act("Hold and shoot the nearest valid target.",'shoot','holdShoot'):act("Hold position — no enemy in range.",null,'holdNone'); }
   function treeFor(u){ if(u.flags.artillery) return treeArtillery; if(u.flags.aircraft) return treeShooting; return ({shooting:treeShooting,hybrid:treeHybrid,melee:treeMelee})[u.type]||treeHybrid; }
 
+  // ---------- PURE, testable to-hit resolver (Grimdark Future Quality test) ----------
+  // weapon = {a, q, ap, reliable, relentless, furious, surge, blast, rending, indirect}
+  // ctx    = {rng, isCharge, isHold, advanced, over9, firstMelee, targetModels, challengeBonus}
+  // rng() must return an integer 1..6. Returns {rolls:[...], hits, notes:[...]}.
+  function resolveHits(weapon, ctx){
+    weapon=weapon||{}; ctx=ctx||{};
+    var rng=(typeof ctx.rng==='function')?ctx.rng:function(){return Math.floor(Math.random()*6)+1;};
+    var n=parseInt(weapon.a,10); if(isNaN(n)||n<0) n=0;
+    var notes=[];
+    // To-hit number: Quality, clamped 2..6; Reliable overrides to 2.
+    var q=parseInt(weapon.q,10); if(isNaN(q)) q=4; if(q<2)q=2; if(q>6)q=6;
+    if(weapon.reliable){ q=2; notes.push('Reliable: hits on 2+.'); }
+    // ±1 die modifiers (cover/AP do NOT touch to-hit — they hit the save step).
+    var mod=0, modbits=[];
+    var cb=parseInt(ctx.challengeBonus,10); if(isNaN(cb)) cb=0; if(cb>0){ mod+=1; modbits.push('Challenge +1'); }
+    if(weapon.indirect && ctx.advanced){ mod-=1; modbits.push('Indirect −1 (moved)'); }
+    // Artillery is a unit-level flag; the caller passes ctx.artillery + ctx.over9.
+    if(ctx.artillery && ctx.over9){ mod+=1; modbits.push('Artillery +1 (over 9")'); }
+    if(modbits.length) notes.push('Modifiers: '+modbits.join(', ')+'.');
+    // Fatigue: a unit's 2nd+ melee in a round only hits on natural 6s.
+    var fatigued = (ctx.isCharge && ctx.firstMelee===false);
+    if(fatigued) notes.push('Fatigue: second melee — only natural 6s hit.');
+    // Natural-6 bonus-hit effects, gated by their trigger.
+    var furiousOn   = !!(weapon.furious && ctx.isCharge);
+    var relentlessOn= !!(weapon.relentless && ctx.isHold && ctx.over9);
+    var surgeOn     = !!weapon.surge;
+    var bonusOn = furiousOn||relentlessOn||surgeOn;
+    var rolls=[], hits=0, sixes=0;
+    for(var i=0;i<n;i++){
+      var d=rng(); rolls.push(d);
+      var isHit;
+      if(d===6) isHit=true;            // natural 6 always hits
+      else if(d===1) isHit=false;      // natural 1 always misses
+      else if(fatigued) isHit=false;   // melee 2nd+: only 6s
+      else isHit=((d+mod)>=q);         // modified Quality test
+      if(d===6) sixes++;
+      if(isHit) hits++;
+    }
+    // Each natural 6 grants +1 extra hit (the extra hit itself triggers nothing further).
+    if(bonusOn && sixes>0){
+      hits+=sixes;
+      var bn=[]; if(furiousOn)bn.push('Furious'); if(relentlessOn)bn.push('Relentless'); if(surgeOn)bn.push('Surge');
+      notes.push(bn.join('/')+': +'+sixes+' hit'+(sixes===1?'':'s')+' from natural 6'+(sixes===1?'':'s')+'.');
+    }
+    // Blast(X): multiply final hits ×X, capped at models in the target.
+    var bx=parseInt(weapon.blast,10);
+    if(!isNaN(bx) && bx>1 && hits>0){
+      var before=hits; hits=hits*bx;
+      var cap=parseInt(ctx.targetModels,10);
+      if(!isNaN(cap) && cap>0 && hits>cap){ hits=cap; notes.push('Blast('+bx+'): '+before+'→'+(before*bx)+' hits, capped at '+cap+' models.'); }
+      else notes.push('Blast('+bx+'): '+before+'→'+hits+' hits.');
+    }
+    if(weapon.rending) notes.push('Rending: any 6 to-hit grants AP+4 on the save (your roll).');
+    if(weapon.ap) notes.push('AP('+weapon.ap+'): subtract from the defender\'s save (your roll).');
+    // _disp lets the dice renderer colour each pip with the exact threshold used here.
+    return {rolls:rolls, hits:hits, notes:notes, _disp:{mod:mod, q:q, fatigued:fatigued}};
+  }
+
   function eligible(){ return state.units.filter(function(u){return !u.activated && onTable(u);}); }
   function selectFromRoll(roll){
     var pool=eligible(); if(!pool.length) return null;
@@ -228,7 +400,7 @@
   }
   function pickUnit(){ var s=selectFromRoll(Math.floor(Math.random()*3)+1); if(!s) return null; s.unit=s.candidates[Math.floor(Math.random()*s.candidates.length)]; return s; }
 
-  var cur=null, ans={}, pendKey=null, curLast=false;
+  var cur=null, ans={}, pendKey=null, curLast=false, objAuto=null;
 
   function renderPlay(){
     var onT=state.units.filter(onTable); var el=eligible();
@@ -244,7 +416,7 @@
     warm(); ensureAudio(); pendKey=null;
     var sel=pickUnit();
     if(!sel){ stageMsg("That's the lot — every unit's had its turn. Tap “New round”, Commander."); speak("That is the lot. Your move, Commander.",{pitch:0.92}); return; }
-    cur=sel.unit; ans={}; curLast=(eligible().length===1);
+    cur=sel.unit; ans={}; objAuto=null; curLast=(eligible().length===1);
     drumroll();
     var intro=buildIntro(sel);
     if(sel.shakenOnly && cur.shaken){ finishShaken(intro); return; }
@@ -258,28 +430,100 @@
     cur=null; curLast=false; renderPlay();
   }
   function ruleNotes(u){ var n=[]; if(u.flags.aircraft)n.push(RULE.aircraft); if(u.flags.artillery)n.push(RULE.artillery); if(u.flags.caster)n.push(RULE.caster); if(u.flags.counter)n.push(RULE.counter); return n; }
+  // Legal auto-answer for OBJ ONLY — reads the player-maintained HUD, never guesses the board.
+  // Sets ans.OBJ when the HUD has been touched and the tree is about to ask OBJ; leaves it for the
+  // player to answer when the HUD is untouched. Returns a short note when it derived an answer.
+  function prefillFromHUD(unit, a){
+    if(!unit || a.OBJ!==undefined) return null;            // already answered (by player or prior derive)
+    if(!objectivesTouched()) return null;                  // HUD untouched -> fall back to asking OBJ
+    var r=treeFor(unit)(unit,a);
+    if(!(r && r.ask==='OBJ')) return null;                 // this unit isn't being asked OBJ -> don't touch
+    var aiControlsAll = !state.objectives.some(function(s){return s!=='ai';}); // any non-'ai' -> not all AI
+    a.OBJ = !aiControlsAll;
+    return a.OBJ
+      ? 'Objectives still contested — the AI seeks open ground (derived from your markers).'
+      : 'You hold every objective — no open ground for the AI to seek (derived from your markers).';
+  }
   function renderStep(intro){
+    var note=prefillFromHUD(cur,ans); if(note) objAuto=note;
     var r=treeFor(cur)(cur,ans);
     if(r.ask){ pendKey=r.ask; var q=Q[r.ask]; stageQuestion(intro,q,r.ask); speak((intro?intro+' ':'')+q,{pitch:1,rate:1}); }
     else finishAction(intro,r);
   }
+  // A unit can have the narrator roll to-hit only if it has Attacks and a Quality.
+  function hasProfile(u){ return !!(u && u.weapon && parseInt(u.weapon.a,10)>0 && parseInt(u.weapon.q,10)>=2); }
   function finishAction(intro, r){
     pendKey=null;
     var u=cur;
+    // Weapon-profile path: gather what the app can know, prompt for the rest, then roll.
+    if(hasProfile(u) && (r.kind==='shoot' || r.kind==='charge')){
+      var w=u.weapon;
+      var ctx={
+        rng:function(){return Math.floor(Math.random()*6)+1;},
+        isCharge:(r.kind==='charge'),
+        isHold:(r.id==='holdShoot'),
+        advanced:(r.id==='advObjShoot'||r.id==='advEnShoot'),
+        artillery:!!u.flags.artillery,
+        challengeBonus:challengeHitBonus() // PROVIDED EXTERNALLY (Objective-HUD agent)
+      };
+      var queue=[];
+      // over9: needed for Artillery (+1) and for Relentless on a Hold-shoot.
+      if(u.flags.artillery || (w.relentless && ctx.isHold)){
+        queue.push({type:'yn', key:'over9', q:'Target over 9 inches away?'});
+      }
+      // firstMelee: every charge with a profile (Fatigue is melee-wide; Furious keys off charge).
+      if(ctx.isCharge){
+        queue.push({type:'yn', key:'firstMelee', q:'First melee for '+u.name+' this round?'});
+      }
+      // targetModels: Blast(X) caps multiplied hits at models in the target.
+      if(parseInt(w.blast,10)>1){
+        queue.push({type:'num', key:'targetModels', q:'How many models in the target unit?'});
+      }
+      runCombatPrompts(intro, r, ctx, queue, 0);
+      return;
+    }
+    finalizeAction(intro, r, null);
+  }
+  // Ask combat-only questions one at a time (tap-driven; isolated from the tree's pendKey).
+  function runCombatPrompts(intro, r, ctx, queue, i){
+    if(i>=queue.length){
+      var res=resolveHits(cur.weapon, ctx);
+      finalizeAction(intro, r, res);
+      return;
+    }
+    var step=queue[i];
+    var advance=function(val){ ctx[step.key]=val; runCombatPrompts(intro, r, ctx, queue, i+1); };
+    if(step.type==='num') stageCombatNum(intro, step.q, advance);
+    else stageCombatYN(intro, step.q, advance);
+    speak((intro?intro+' ':'')+step.q,{pitch:1,rate:1});
+  }
+  function finalizeAction(intro, r, hitRes){
+    var u=cur;
     var head=rnd(LINES[r.id]||["{u} act."]).replace(/\{u\}/g,u.name);
     var extra=[];
+    if(objAuto) extra.push(objAuto);
     if(u.flags.aircraft) extra.push("Moves 30\" in a straight line (Aircraft).");
     if(r.kind==='shoot') extra.push("Target: the nearest valid enemy — you pick it, preferring not-yet-activated and in the open over cover; then apply AP / Deadly / Takedown / Unstoppable overrides.");
     if(r.kind==='charge') extra.push("Charge: the nearest valid enemy — you pick it, preferring not-yet-activated; the AI strikes first.");
     if(u.flags.caster) extra.push("Then cast: roll D3 + caster level for a random spell (4+ to resolve, target in line of sight).");
     var notes=ruleNotes(u);
+    if(hitRes) notes=notes.concat(hitRes.notes);
     var spoken=(intro?intro+' ':'')+(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head;
+    if(hitRes){ var verdict=hitVerdict(hitRes); spoken+=' '+verdict.spoken; }
     u.activated=true; save(); renderArmy();
     if(r.kind==='charge') sting();
-    stageResult(intro, head, r.action, extra.concat(notes), curLast);
-    logAdd(u.name+": "+r.action);
+    stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes);
+    logAdd(u.name+": "+r.action+(hitRes?(' ['+hitRes.hits+' hit'+(hitRes.hits===1?'':'s')+']'):''));
     speak(spoken,{pitch:0.86,rate:0.93});
     cur=null; curLast=false; renderPlay();
+  }
+  // Witty British verdict for the dice result (narration only — saves are the player's).
+  function hitVerdict(res){
+    var shots=res.rolls.length, h=res.hits;
+    var word=function(n){ var w=['no','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve']; return (n>=0&&n<w.length)?w[n]:String(n); };
+    var shotsTxt=word(shots)+' shot'+(shots===1?'':'s');
+    var hitsTxt=(h===0)?'not a single hit. How embarrassing.':(word(h)+' hit'+(h===1?'':'s')+'!');
+    return {spoken:shotsTxt.charAt(0).toUpperCase()+shotsTxt.slice(1)+'… '+hitsTxt, text:shotsTxt+' → '+(h===0?'0 hits':word(h)+' hit'+(h===1?'':'s'))};
   }
 
   // ---------- stage rendering ----------
@@ -292,21 +536,69 @@
     Array.prototype.forEach.call(st.querySelectorAll('[data-yn]'),function(b){ b.addEventListener('click',function(){ answerQuestion(b.getAttribute('data-yn')==='1'); }); });
   }
   function answerQuestion(val){ if(!pendKey)return; ans[pendKey]=val; renderStep(''); }
-  function stageResult(intro, headline, mech, extras, last){
+  // ---- combat-only prompts (tap-driven, separate from the tree's pendKey/answerQuestion) ----
+  function stageCombatYN(intro, q, cb){
+    var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
+    h+='<p class="nar-q">'+esc(q)+'</p><div class="nar-yn"><button class="nar-btn" data-cyn="1">Yes</button><button class="nar-btn ghost" data-cyn="0">No</button></div>';
+    var st=$('narStage'); st.innerHTML=h;
+    Array.prototype.forEach.call(st.querySelectorAll('[data-cyn]'),function(b){ b.addEventListener('click',function(){ cb(b.getAttribute('data-cyn')==='1'); }); });
+  }
+  function stageCombatNum(intro, q, cb){
+    var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
+    h+='<p class="nar-q">'+esc(q)+'</p><div class="nar-yn"><input type="number" min="1" max="99" step="1" class="nar-num2" id="narNumIn" inputmode="numeric"><button class="nar-btn" data-cnum="1">OK</button></div>';
+    var st=$('narStage'); st.innerHTML=h;
+    var inp=$('narNumIn'); if(inp){ try{inp.focus();}catch(e){} }
+    var go=function(){ var v=parseInt(inp&&inp.value,10); if(isNaN(v)||v<1) v=1; cb(v); };
+    Array.prototype.forEach.call(st.querySelectorAll('[data-cnum]'),function(b){ b.addEventListener('click',go); });
+    if(inp) inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  }
+  // Render N dice as CSS pips; mark hits/crits/misses for at-a-glance reading.
+  function diceHTML(res, ctx){
+    if(!res||!res.rolls||!res.rolls.length) return '';
+    // recompute per-die hit state for display (same logic as resolver, no bonus dice)
+    var w=ctx&&ctx.weapon||{}, mod=(ctx&&ctx.mod)||0, q=(ctx&&ctx.q)||4, fatigued=(ctx&&ctx.fatigued)||false;
+    var h='<div class="nar-dice">';
+    res.rolls.forEach(function(d){
+      var hit; if(d===6)hit=true; else if(d===1)hit=false; else if(fatigued)hit=false; else hit=((d+mod)>=q);
+      var cls='nar-die p'+d+' '+(d===6?'crit':(hit?'hit':'miss'));
+      var pips=''; for(var k=0;k<d;k++) pips+='<i></i>';
+      h+='<span class="'+cls+'" aria-label="'+d+'">'+pips+'</span>';
+    });
+    h+='</div>';
+    return h;
+  }
+  function stageResult(intro, headline, mech, extras, last, hitRes){
     var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
     if(last) h+='<p class="nar-last">LAST STAND</p>';
     h+='<p class="nar-action">▶ '+esc(headline)+'</p>';
+    if(hitRes && hitRes.rolls && hitRes.rolls.length){
+      h+=diceHTML(hitRes, hitRes._disp||{});
+      var v=hitVerdict(hitRes);
+      h+='<p class="nar-tally">'+esc(v.text)+(hitRes.hits===0?' <span class="miss">(saves? none needed)</span>':'')+'</p>';
+    }
     if(mech) h+='<p class="nar-mech"><b>Rules:</b> '+esc(mech)+'</p>';
     if(extras&&extras.length){ h+='<ul class="nar-extra">'; extras.forEach(function(e){h+='<li>'+esc(e)+'</li>';}); h+='</ul>'; }
     $('narStage').innerHTML=h;
   }
   function logAdd(t){ var l=$('narLog'); var p=document.createElement('div'); p.className='nar-logitem'; p.textContent='R'+state.round+' • '+t; l.insertBefore(p,l.firstChild); }
+  // Witty Challenge-Bonus threat, DERIVED from the objective chips. Soft generic line if HUD untouched.
+  function challengeLine(){
+    if(!objectivesTouched())
+      return "Challenge bonus: if the AI holds as much ground as you, its troops fight with extra venom — plus one to hit; if it's behind, plus one to hit and plus one to defence. Tap the objective markers and I'll work it out myself.";
+    var ai=aiObjectives(), me=myObjectives();
+    if(challengeDefBonus()) // AI behind: +1 hit AND +1 defence
+      return "We're behind on the objectives, "+ai+" to your "+me+" — so it's plus one to hit AND plus one to defence, and the lads are absolutely furious about it.";
+    // AI level-or-ahead: +1 hit (challengeHitBonus()===1 whenever ai>=me and HUD touched)
+    if(ai>me)
+      return "We hold more ground than you, "+ai+" to your "+me+" — plus one to hit, and we'll be insufferable about it.";
+    return "We hold as much ground as you, "+ai+" apiece — the lads fight with extra venom, plus one to hit.";
+  }
   function newRound(){
     ensureAudio();
     state.round++; state.units.forEach(function(u){u.activated=false;}); save(); renderArmy();
     var parts=['Round '+state.round+'.'];
     if(state.round===2 && state.units.some(function(u){return u.flags.ambush;})) parts.push('Loose the ambushers now — somewhere rude, over 9 inches from your lot.');
-    parts.push("Challenge bonus: if the AI holds as much ground as you, its troops fight with extra venom — plus one to hit; if it's behind, plus one to hit and plus one to defence.");
+    parts.push(challengeLine());
     stageMsg(parts.join(' ')); speak(parts.join(' '),{pitch:0.95}); renderPlay();
     var l=$('narLog'); var hr=document.createElement('div'); hr.className='nar-logsep'; hr.textContent='— Round '+state.round+' —'; l.insertBefore(hr,l.firstChild);
   }
@@ -342,15 +634,17 @@
     });
   }
 
-  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible}; // self-test
+  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible,challengeHitBonus:challengeHitBonus,challengeDefBonus:challengeDefBonus,prefillFromHUD:prefillFromHUD,objectivesTouched:objectivesTouched,aiObjectives:aiObjectives,myObjectives:myObjectives,sanitizeObjectives:sanitizeObjectives,setObjCount:setObjCount,cycleObjective:cycleObjective,challengeLine:challengeLine,resolveHits:resolveHits,hasProfile:hasProfile}; // self-test
 
   load();
   $('narAdd').addEventListener('click',function(){ addUnit(); });
   $('narSample').addEventListener('click',loadSample);
   $('narNext').addEventListener('click',startActivation);
   $('narNewRound').addEventListener('click',newRound);
+  $('narObjMinus').addEventListener('click',function(){ setObjCount(state.objectives.length-1); });
+  $('narObjPlus').addEventListener('click',function(){ setObjCount(state.objectives.length+1); });
   wireMic();
-  renderArmy(); renderPlay();
+  renderArmy(); renderObjectives(); renderPlay();
   stageMsg(state.units.length?'Tap “Next AI Activation” to unleash the machine.':'Muster the AI army (or load the HDF sample), then tap “Next AI Activation”.');
 })();
 </script>
