@@ -224,10 +224,10 @@
     if(out.length>5) out=out.slice(0,5);
     return out;
   }
-  var state={round:1,seq:0,units:[],objectives:defaultObjectives(3)};
+  var state={round:1,seq:0,units:[],objectives:defaultObjectives(3),targets:[]};
   var LSK='oprNarratorArmy';
   function save(){ try{ localStorage.setItem(LSK, JSON.stringify(state)); }catch(e){} }
-  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; state.objectives=sanitizeObjectives(p.objectives); } } }catch(e){} }
+  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; state.objectives=sanitizeObjectives(p.objectives); state.targets=Array.isArray(p.targets)?p.targets:[]; } } }catch(e){} }
   function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
   function onTable(u){ return !(u.flags.ambush && state.round<2); }
 
@@ -537,15 +537,46 @@
     return {ap:ap, rend:rend, hits:hits, tier:tier, text:bits.join(' · ')};
   }
   // Player rolled their own saves (paper) and reports models lost -> the AI reacts + flags morale. We never roll your saves.
-  function reactToDamage(lost, hits){
-    lost=Math.max(0, parseInt(lost,10)||0);
-    var tier=(lost<=0)?'none':((lost>=3||lost>=Math.ceil(hits/2))?'heavy':'some');
-    var rid=pickBank('react_'+tier);
-    var ids=(lost<=0)?[rid]:['num_'+lost,'w_down',rid];
-    var st=$('narStage'); if(st){ var rr=st.querySelector('.nar-report'); if(rr&&rr.parentNode) rr.parentNode.removeChild(rr);
-      var p=document.createElement('p'); p.className='nar-react'; p.textContent='▸ '+(lost>0? numWord(lost)+' down. ':'')+clipText(rid)+(lost>0?' — test their morale if that’s half the unit or worse.':''); st.appendChild(p); }
-    logAdd('  ↳ '+lost+' model'+(lost===1?'':'s')+' lost');
-    say((lost>0? numWord(lost)+' down. ':'')+clipText(rid), {pitch:0.86,rate:0.95}, ids);
+  // ---- target memory: agnostic wound-pool per remembered enemy unit ----
+  function nextTid(){ state.seq=(state.seq||0)+1; return 't'+state.seq; }
+  function pushTarget(name, cap){ var t={id:nextTid(), name:(name&&name.trim())||('Target '+(state.targets.length+1)), cap:Math.max(1,parseInt(cap,10)||1), taken:0}; state.targets.push(t); save(); return t; }
+  function renderTargetPicker(){
+    var box=$('narReport'); if(!box) return;
+    var live=state.targets.filter(function(t){ return (t.cap-(t.taken||0))>0; });
+    var h='<span class="muted small">Hit landed — which unit?</span> ';
+    live.forEach(function(t){ h+='<button class="nar-btn ghost" data-tid="'+t.id+'">'+esc(t.name)+' ('+(t.cap-(t.taken||0))+'/'+t.cap+')</button>'; });
+    h+='<button class="nar-btn ghost" data-tnew="1">+ new</button>';
+    box.innerHTML=h;
+    Array.prototype.forEach.call(box.querySelectorAll('[data-tid]'),function(b){ b.addEventListener('click',function(){ var id=b.getAttribute('data-tid'), t=null,i; for(i=0;i<state.targets.length;i++) if(state.targets[i].id===id) t=state.targets[i]; if(t) askDamage(t); }); });
+    var nb=box.querySelector('[data-tnew]'); if(nb) nb.addEventListener('click',renderNewTarget);
+  }
+  function renderNewTarget(){
+    var box=$('narReport'); if(!box) return;
+    box.innerHTML='<span class="muted small">New target —</span> <input type="text" class="nar-name" id="narTName" placeholder="name"> <input type="number" min="1" max="99" step="1" class="nar-num2" id="narTCap" placeholder="wounds" inputmode="numeric"> <button class="nar-btn" id="narTAdd">add</button> <span class="muted small">total wounds = model count for a squad, Tough for a monster</span>';
+    var add=function(){ var nm=$('narTName'), cp=$('narTCap'); askDamage(pushTarget(nm&&nm.value, cp&&cp.value)); };
+    var ab=$('narTAdd'); if(ab) ab.addEventListener('click',add);
+    var cpEl=$('narTCap'); if(cpEl) cpEl.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); add(); } });
+  }
+  function askDamage(t){
+    var box=$('narReport'); if(!box) return;
+    box.innerHTML='<span class="muted small">Damage to '+esc(t.name)+'? (models removed, or wounds on a tough model)</span> <input type="number" min="0" max="99" step="1" class="nar-num2" id="narDmg" value="0" inputmode="numeric"> <button class="nar-btn" id="narDmgOk">OK</button>';
+    var go=function(){ var d=$('narDmg'); applyAndReact(t, d?d.value:0); };
+    var ok=$('narDmgOk'); if(ok) ok.addEventListener('click',go);
+    var d=$('narDmg'); if(d){ try{d.focus();}catch(e){} d.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
+  }
+  // You applied your own saves/Tough/Deadly/Regen and report the damage that stuck. App tracks the pool + flags morale/destroyed.
+  function applyAndReact(t, dmg){
+    dmg=Math.max(0,parseInt(dmg,10)||0);
+    t.taken=Math.min(t.cap,(t.taken||0)+dmg); save();
+    var remaining=t.cap-t.taken, destroyed=remaining<=0, half=(!destroyed && remaining*2<=t.cap);
+    var rid = destroyed? pickBank('react_wipe') : (dmg<=0? pickBank('react_none') : (half? pickBank('react_heavy') : pickBank('react_some')));
+    var moraleId = (half && !destroyed)? pickBank('morale') : null;
+    var ids=[]; if(dmg>0) ids.push('num_'+dmg); if(rid) ids.push(rid); if(moraleId) ids.push(moraleId);
+    var box=$('narReport');
+    if(box){ var status = destroyed? (esc(t.name)+' — destroyed.') : (esc(t.name)+': '+remaining+' of '+t.cap+' left'+(half?' — at half: test morale (fail = Shaken; Rout in melee).':'.'));
+      box.innerHTML='<p class="nar-react">▸ '+esc((dmg>0?numWord(dmg)+' taken. ':'')+clipText(rid))+'</p><p class="muted small">'+status+'</p>'; }
+    logAdd('  ↳ '+t.name+': '+dmg+' dmg → '+remaining+'/'+t.cap+(destroyed?' DESTROYED':(half?' (half)':'')));
+    say((dmg>0?numWord(dmg)+' taken. ':'')+clipText(rid)+(moraleId?' '+clipText(moraleId):''),{pitch:0.86,rate:0.95}, ids);
   }
   function finalizeAction(intro, r, hitRes){
     var u=cur;
@@ -566,9 +597,10 @@
     var hits = th? th.hits : 0;
     u.activated=true; save(); renderArmy();
     if(r.kind==='charge') sting();
-    stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes, th, (hits>0? function(lost){ reactToDamage(lost, hits); } : null));
+    stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes, th, hits>0);
     logAdd(u.name+": "+r.action+(th?(' ['+hits+' hit'+(hits===1?'':'s')+']'):''));
     consumeIntro(vids, verdictTxt, {pitch:0.86,rate:0.93});
+    if(hits>0) renderTargetPicker();
     cur=null; curLast=false; renderPlay();
   }
 
@@ -613,7 +645,7 @@
     h+='</div>';
     return h;
   }
-  function stageResult(intro, headline, mech, extras, last, hitRes, th, onReport){
+  function stageResult(intro, headline, mech, extras, last, hitRes, th, report){
     var h=''; if(intro) h+='<p class="nar-intro">'+esc(intro)+'</p>';
     if(last) h+='<p class="nar-last">LAST STAND</p>';
     h+='<p class="nar-action">▶ '+esc(headline)+'</p>';
@@ -623,9 +655,8 @@
     }
     if(mech) h+='<p class="nar-mech"><b>Rules:</b> '+esc(mech)+'</p>';
     if(extras&&extras.length){ h+='<ul class="nar-extra">'; extras.forEach(function(e){h+='<li>'+esc(e)+'</li>';}); h+='</ul>'; }
-    if(onReport && th && th.hits>0){ h+='<div class="nar-report">After your saves — models lost? <input type="number" min="0" max="99" step="1" class="nar-num2" id="narLostIn" inputmode="numeric" value="0"><button class="nar-btn" id="narLostOk">OK</button></div>'; }
-    var st=$('narStage'); st.innerHTML=h;
-    if(onReport && th && th.hits>0){ var ok=$('narLostOk'), inp=$('narLostIn'); var go=function(){ onReport(parseInt(inp&&inp.value,10)||0); }; if(ok) ok.addEventListener('click',go); if(inp) inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
+    if(report && th && th.hits>0){ h+='<div id="narReport" class="nar-report"></div>'; }
+    $('narStage').innerHTML=h;
   }
   function logAdd(t){ var l=$('narLog'); var p=document.createElement('div'); p.className='nar-logitem'; p.textContent='R'+state.round+' • '+t; l.insertBefore(p,l.firstChild); }
   // Witty Challenge-Bonus threat, DERIVED from the objective chips. Soft generic line if HUD untouched.
