@@ -163,6 +163,32 @@
   function speak(t,opts){ if(!('speechSynthesis' in window)||!t) return; opts=opts||{}; try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='en-GB'; if(voice)u.voice=voice; u.pitch=(opts.pitch||1); u.rate=(opts.rate||1); speechSynthesis.speak(u);}catch(e){} }
   var warmed=false; function warm(){ if(warmed||!('speechSynthesis' in window))return; try{var u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);warmed=true;}catch(e){} }
 
+  // ---------- ElevenLabs pre-rendered clips (random per context; falls back to Web Speech) ----------
+  var AUD={ base:'audio/', clips:null, banks:null, ranges:{}, ready:false, cur:null };
+  (function loadManifest(){ try{ fetch(AUD.base+'manifest.json').then(function(r){ return r.ok?r.json():null; }).then(function(m){ if(m){ AUD.clips=m.clips||{}; AUD.banks=m.banks||{}; AUD.ranges=m.ranges||{}; AUD.ready=true; } }).catch(function(){}); }catch(e){} })();
+  function clipId(id){ if(!AUD.ready||!id) return false; if(AUD.clips&&Object.prototype.hasOwnProperty.call(AUD.clips,id)) return true; var m; if((m=/^num_(\d+)$/.exec(id))) return (+m[1])<=(AUD.ranges.num||0); if((m=/^round_(\d+)$/.exec(id))) return (+m[1])>=1&&(+m[1])<=(AUD.ranges.round||0); if((m=/^section_(\d+)$/.exec(id))) return (+m[1])>=1&&(+m[1])<=(AUD.ranges.section||0); return false; }
+  function pickBank(b){ var a=AUD.banks&&AUD.banks[b]; if(!a||!a.length) return null; return a[Math.floor(Math.random()*a.length)]; }
+  function stopAll(){ try{ if(AUD.cur){ AUD.cur.onended=null; AUD.cur.onerror=null; AUD.cur.pause(); AUD.cur=null; } }catch(e){} if('speechSynthesis' in window){ try{ speechSynthesis.cancel(); }catch(e){} } }
+  function playClips(ids, fallbackText, opts){
+    ids=(ids||[]).filter(function(x){return x;});
+    if(!(ids.length && ids.every(clipId))){ speak(fallbackText, opts); return; }   // all-or-nothing: any missing clip -> TTS the whole line
+    stopAll();
+    var i=0;
+    (function nxt(){ if(i>=ids.length){ AUD.cur=null; return; } var el=new Audio(AUD.base+ids[i]+'.mp3'); AUD.cur=el; el.onended=function(){ i++; nxt(); }; el.onerror=function(){ AUD.cur=null; speak(fallbackText, opts); }; var p=el.play(); if(p&&p['catch']) p['catch'](function(){ AUD.cur=null; speak(fallbackText, opts); }); })();
+  }
+  function say(text, opts, ids){ if(ids&&ids.length){ playClips(ids, text, opts); } else { speak(text, opts); } }
+  function introIds(sel){ return ['section_'+sel.sec, 'typein_'+sel.unit.type]; }
+  function diceClipIds(hitRes){ if(!hitRes||!hitRes.rolls) return []; var s=hitRes.rolls.length, h=hitRes.hits; var tier=(h===0)?'dice_zero':((s>0&&h/s>=0.5)?'dice_high':'dice_low'); return ['num_'+s,'w_shots','num_'+h,'w_hits',pickBank(tier)]; }
+  // intro is folded into the FIRST spoken event of an activation (set in startActivation, consumed once)
+  function consumeIntro(ids, text, opts){
+    ids=(ids||[]).filter(function(x){return x;});
+    var ptext=(introText?introText+' ':'')+text;
+    var pids=introQueue.concat(ids);
+    introQueue=[]; introText='';
+    if(!ids.length){ speak(ptext, opts); return; }   // content has no clip of its own -> TTS the whole line (intro included)
+    say(ptext, opts, pids);
+  }
+
   // ---------- personality (narration only — never changes the legal action) ----------
   function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
   var LINES={
@@ -400,7 +426,7 @@
   }
   function pickUnit(){ var s=selectFromRoll(Math.floor(Math.random()*3)+1); if(!s) return null; s.unit=s.candidates[Math.floor(Math.random()*s.candidates.length)]; return s; }
 
-  var cur=null, ans={}, pendKey=null, curLast=false, objAuto=null;
+  var cur=null, ans={}, pendKey=null, curLast=false, objAuto=null, introQueue=[], introText='';
 
   function renderPlay(){
     var onT=state.units.filter(onTable); var el=eligible();
@@ -415,10 +441,11 @@
   function startActivation(){
     warm(); ensureAudio(); pendKey=null;
     var sel=pickUnit();
-    if(!sel){ stageMsg("That's the lot — every unit's had its turn. Tap “New round”, Commander."); speak("That is the lot. Your move, Commander.",{pitch:0.92}); return; }
+    if(!sel){ stageMsg("That's the lot — every unit's had its turn. Tap “New round”, Commander."); say("That is the lot. Your move, Commander.",{pitch:0.92},[pickBank('alldone')]); return; }
     cur=sel.unit; ans={}; objAuto=null; curLast=(eligible().length===1);
     drumroll();
     var intro=buildIntro(sel);
+    introQueue=introIds(sel); introText=intro;
     if(sel.shakenOnly && cur.shaken){ finishShaken(intro); return; }
     renderStep(intro);
   }
@@ -426,7 +453,7 @@
     var u=cur, msg=u.name+" have lost their nerve — they cower and pull themselves together. Pathetic, really.";
     u.activated=true; u.shaken=false; save(); renderArmy();
     stageResult(intro, msg, "Shaken: idle this activation to recover", [], false);
-    logAdd(u.name+": Shaken — cowering (recovers)."); speak((intro?intro+' ':'')+'… '+msg,{pitch:0.92,rate:0.95});
+    logAdd(u.name+": Shaken — cowering (recovers)."); consumeIntro([pickBank('shaken')], '… '+msg, {pitch:0.92,rate:0.95});
     cur=null; curLast=false; renderPlay();
   }
   function ruleNotes(u){ var n=[]; if(u.flags.aircraft)n.push(RULE.aircraft); if(u.flags.artillery)n.push(RULE.artillery); if(u.flags.caster)n.push(RULE.caster); if(u.flags.counter)n.push(RULE.counter); return n; }
@@ -447,7 +474,7 @@
   function renderStep(intro){
     var note=prefillFromHUD(cur,ans); if(note) objAuto=note;
     var r=treeFor(cur)(cur,ans);
-    if(r.ask){ pendKey=r.ask; var q=Q[r.ask]; stageQuestion(intro,q,r.ask); speak((intro?intro+' ':'')+q,{pitch:1,rate:1}); }
+    if(r.ask){ pendKey=r.ask; var q=Q[r.ask]; stageQuestion(intro,q,r.ask); consumeIntro([pickBank('q_'+r.ask)], q, {pitch:1,rate:1}); }
     else finishAction(intro,r);
   }
   // A unit can have the narrator roll to-hit only if it has Attacks and a Quality.
@@ -495,7 +522,7 @@
     var advance=function(val){ ctx[step.key]=val; runCombatPrompts(intro, r, ctx, queue, i+1); };
     if(step.type==='num') stageCombatNum(intro, step.q, advance);
     else stageCombatYN(intro, step.q, advance);
-    speak((intro?intro+' ':'')+step.q,{pitch:1,rate:1});
+    consumeIntro([], step.q, {pitch:1,rate:1});
   }
   function finalizeAction(intro, r, hitRes){
     var u=cur;
@@ -508,13 +535,15 @@
     if(u.flags.caster) extra.push("Then cast: roll D3 + caster level for a random spell (4+ to resolve, target in line of sight).");
     var notes=ruleNotes(u);
     if(hitRes) notes=notes.concat(hitRes.notes);
-    var spoken=(intro?intro+' ':'')+(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head;
-    if(hitRes){ var verdict=hitVerdict(hitRes); spoken+=' '+verdict.spoken; }
+    var verdictTxt=(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head+(hitRes? ' '+hitVerdict(hitRes).spoken : '');
+    var vids=[]; if(curLast){ var ls=pickBank('laststand'); if(ls) vids.push(ls); }
+    var av=pickBank('act_'+r.id); if(av) vids.push(av);
+    if(hitRes) vids=vids.concat(diceClipIds(hitRes));
     u.activated=true; save(); renderArmy();
     if(r.kind==='charge') sting();
     stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes);
     logAdd(u.name+": "+r.action+(hitRes?(' ['+hitRes.hits+' hit'+(hitRes.hits===1?'':'s')+']'):''));
-    speak(spoken,{pitch:0.86,rate:0.93});
+    consumeIntro(vids, verdictTxt, {pitch:0.86,rate:0.93});
     cur=null; curLast=false; renderPlay();
   }
   // Witty British verdict for the dice result (narration only — saves are the player's).
@@ -596,10 +625,12 @@
   function newRound(){
     ensureAudio();
     state.round++; state.units.forEach(function(u){u.activated=false;}); save(); renderArmy();
-    var parts=['Round '+state.round+'.'];
-    if(state.round===2 && state.units.some(function(u){return u.flags.ambush;})) parts.push('Loose the ambushers now — somewhere rude, over 9 inches from your lot.');
+    var parts=['Round '+state.round+'.']; var rids=['round_'+state.round];
+    if(state.round===2 && state.units.some(function(u){return u.flags.ambush;})){ parts.push('Loose the ambushers now — somewhere rude, over 9 inches from your lot.'); var ab=pickBank('ambush'); if(ab) rids.push(ab); }
     parts.push(challengeLine());
-    stageMsg(parts.join(' ')); speak(parts.join(' '),{pitch:0.95}); renderPlay();
+    var bstate = !objectivesTouched() ? 'untracked' : (challengeDefBonus() ? 'behind' : (aiObjectives()>myObjectives() ? 'ahead' : 'level'));
+    var bb=pickBank('bonus_'+bstate); if(bb) rids.push(bb);
+    stageMsg(parts.join(' ')); say(parts.join(' '),{pitch:0.95}, rids); renderPlay();
     var l=$('narLog'); var hr=document.createElement('div'); hr.className='nar-logsep'; hr.textContent='— Round '+state.round+' —'; l.insertBefore(hr,l.firstChild);
   }
 
