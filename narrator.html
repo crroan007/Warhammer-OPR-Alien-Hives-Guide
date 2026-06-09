@@ -59,6 +59,8 @@
   .nar-objlbl{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--acc2);text-transform:uppercase}
   .nar-objchips{display:flex;flex-wrap:wrap;gap:7px}
   .nar-objchip{cursor:pointer;-webkit-appearance:none;appearance:none;font:inherit;font-size:12px;font-weight:700;line-height:1.1;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:#0e1410;color:var(--muted);min-width:62px;text-align:center}
+  .nar-defbanner{margin:6px 0 0;padding:8px 11px;border-radius:9px;border:1px solid var(--acc);background:#13201a;color:var(--acc);font-size:13px;font-weight:700}
+  .nar-defbanner[hidden]{display:none}
   .nar-objchip .nar-objstate{display:block;font-size:10px;font-weight:800;letter-spacing:.5px;margin-top:1px;opacity:.85}
   .nar-objchip.mine{border-color:var(--acc2);color:var(--acc2)}
   .nar-objchip.ai{border-color:var(--danger);color:var(--danger)}
@@ -134,6 +136,7 @@
   <section class="unit">
     <h2>Run the AI Turn</h2>
     <div class="nar-roundbar"><span>Round <b id="narRound">1</b></span><button id="narNewRound" class="nar-btn ghost">New round</button><span id="narLeft" class="muted small"></span></div>
+    <div id="narScore" class="muted small" style="margin:4px 0 0"></div>
     <button id="narNext" class="nar-btn nar-go">▶ Next AI Activation</button>
     <button id="narMic" class="nar-mic2">🎤 Voice — say “next”, then answer “yes” / “no”</button>
     <div class="nar-objbar">
@@ -141,7 +144,8 @@
       <div id="narObjChips" class="nar-objchips"></div>
       <span class="nar-objcount">Count <button id="narObjMinus" type="button" title="Fewer objectives">−</button><b id="narObjN">3</b><button id="narObjPlus" type="button" title="More objectives">+</button></span>
     </div>
-    <p class="muted small" style="margin:2px 0 0">Tap a marker to cycle <em>empty → yours → AI's</em>. The AI reads these: it claims the Challenge Bonus and stops asking about open objectives when you keep them current.</p>
+    <div id="narDefReminder" class="nar-defbanner" hidden>🛡️ AI saves at <b>+1</b> this round — behind on objectives. Apply it when YOU roll to wound the AI.</div>
+    <p class="muted small" style="margin:2px 0 0">Tap a marker to cycle <em>empty → yours → AI's</em>. The AI reads these: it claims the Challenge Bonus and stops asking about open objectives when you keep them current. <em>Shaken units don't count toward control — don't mark a marker "AI's" if only a Shaken unit holds it.</em></p>
     <div id="narStage" class="nar-stage"></div>
     <div id="narLog" class="nar-log"></div>
   </section>
@@ -215,6 +219,27 @@
     holdNone:["{u} hold position — nothing worth shooting. How disappointing for them.","{u} sit tight; no targets in range. They'll sulk about it.","{u} hold, twiddling thumbs. Not a soul in range."]
   };
   var LASTSTAND=["This is the last of them. No reinforcements, no mercy.","Down to their final breath — and twice as dangerous.","The last one standing. Make them earn it."];
+  // Rotating variants for a deserted section (shifted activation). {r}=rolled section, {s}=section used.
+  var DESERT=[
+    "Section {r}'s deserted — clockwise to section {s}.",
+    "Nobody home in section {r}. We rotate clockwise to section {s}.",
+    "Section {r}'s gone to ground — so it falls to section {s}, clockwise.",
+    "Not a soul stirring in section {r}; clockwise we go, section {s} it is."
+  ];
+  // Dedicated 0-hit (whiff) anticlimax beats — used when th.hits===0 on the TTS path.
+  var WHIFFLINE=[
+    "Not a single hit. How thoroughly embarrassing.",
+    "Every shot wide. We shall never speak of this again.",
+    "Nothing connects. A masterclass in missing.",
+    "All bluster, no blood. Do try harder next time."
+  ];
+  // The human took wounds but held (survived, not at half, not destroyed). Grudging respect.
+  var HELDLINE=[
+    "Still standing. Irritating, that.",
+    "They held. How tiresomely stubborn.",
+    "Bloodied but unbowed — the nerve of them.",
+    "They take it and keep their feet. Vexing."
+  ];
 
   // ---------- behavioural rule notes (canonical, condensed from Advanced Rules v3.5.1) ----------
   var RULE={
@@ -235,15 +260,17 @@
     return out;
   }
   var state={round:1,seq:0,units:[],objectives:defaultObjectives(3),targets:[]};
+  var ended=false; // F9: game-over latch (set true after round 4)
   var LSK='oprNarratorArmy';
   function save(){ try{ localStorage.setItem(LSK, JSON.stringify(state)); }catch(e){} }
   function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; state.objectives=sanitizeObjectives(p.objectives); state.targets=Array.isArray(p.targets)?p.targets:[]; } } }catch(e){} }
   function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
   function onTable(u){ return !(u.flags.ambush && state.round<2); }
 
-  function pushUnit(d){ d=d||{}; var u={id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}; if(d.weapon) u.weapon=d.weapon; if(d.cost!=null) u.cost=d.cost; state.units.push(u); }
+  function pushUnit(d){ d=d||{}; var u={id:nextId(),name:d.name||('AI Unit '+(state.units.length+1)),type:d.type||'hybrid',section:d.section||1,flags:d.flags||{},activated:false,shaken:false}; if(d.weapon) u.weapon=d.weapon; if(d.weaponRanged) u.weaponRanged=d.weaponRanged; if(d.weaponMelee) u.weaponMelee=d.weaponMelee; if(d.cost!=null) u.cost=d.cost; state.units.push(u); }
   function addUnit(d){ pushUnit(d); save(); renderArmy(); renderPlay(); }
-  function removeUnit(id){ state.units=state.units.filter(function(u){return u.id!==id;}); save(); renderArmy(); renderPlay(); }
+  function removeUnit(id){ state.units=state.units.filter(function(u){return u.id!==id;}); save(); renderArmy(); renderPlay();
+    if(!ended && !state.units.length){ var msg='Every machine unit is wrecked. The army can\'t win by survival alone — objectives decide (AdvancedRules). '+scoreLine(state.round); stageMsg(msg); say(msg,{pitch:0.92},[pickBank('alldone')]); } }
   function loadSample(){ state.units=[]; state.round=1; state.seq=0;
     pushUnit({name:'Battle Brothers',type:'shooting',section:1,flags:{},weapon:{a:10,q:3,ap:1}});
     pushUnit({name:'Heavy Weapons Team',type:'shooting',section:2,flags:{artillery:true},weapon:{a:3,q:4,ap:2,blast:3}});
@@ -270,34 +297,45 @@
       var sh=document.createElement('label'); sh.className='nar-shaken'; var scb=document.createElement('input'); scb.type='checkbox'; scb.checked=!!u.shaken; scb.addEventListener('change',function(){u.shaken=scb.checked;save();renderArmy();renderPlay();}); sh.appendChild(scb); sh.appendChild(document.createTextNode('Shaken')); r2.appendChild(sh);
       card.appendChild(r1); card.appendChild(r2);
       // ---- optional weapon profile (collapsed unless already set) ----
-      var hasProf=!!(u.weapon && (u.weapon.a||u.weapon.q));
-      var pr=document.createElement('div'); pr.className='nar-profrow';
-      var tog=document.createElement('button'); tog.type='button'; tog.className='nar-proftoggle'; tog.textContent='⚔ profile'; tog.setAttribute('aria-expanded', hasProf?'true':'false');
-      var panel=document.createElement('div'); panel.className='nar-prof'+(hasProf?'':' hidden');
-      tog.addEventListener('click',function(){ var open=panel.classList.toggle('hidden')===false; tog.setAttribute('aria-expanded', open?'true':'false'); });
-      function ensureW(){ if(!u.weapon) u.weapon={a:0,q:0,ap:0}; return u.weapon; }
-      function numField(labelTxt,key,min,max){
-        var lab=document.createElement('label'); lab.appendChild(document.createTextNode(labelTxt));
-        var inp=document.createElement('input'); inp.type='number'; inp.className='nar-num'; inp.min=String(min); inp.max=String(max); inp.step='1';
-        inp.value=(u.weapon&&u.weapon[key]!=null&&u.weapon[key]!=='')?String(u.weapon[key]):'';
-        inp.addEventListener('input',function(){ var w=ensureW(); var v=parseInt(inp.value,10); w[key]=isNaN(v)?0:v; save(); });
-        lab.appendChild(inp); return lab;
+      // F7: a factory so hybrids can show TWO panels (🔫 ranged + 🗡 melee). getRaw() reads the
+      // profile object (may be undefined); ensureFn() lazily creates it on first edit. Single/legacy
+      // units use one '⚔ profile' panel editing u.weapon, exactly as before.
+      function makeProfPanel(label, getRaw, ensureFn, showHint){
+        var raw=getRaw();
+        var hasProf=!!(raw && (raw.a||raw.q));
+        var pr=document.createElement('div'); pr.className='nar-profrow';
+        var tog=document.createElement('button'); tog.type='button'; tog.className='nar-proftoggle'; tog.textContent=label; tog.setAttribute('aria-expanded', hasProf?'true':'false');
+        var panel=document.createElement('div'); panel.className='nar-prof'+(hasProf?'':' hidden');
+        tog.addEventListener('click',function(){ var open=panel.classList.toggle('hidden')===false; tog.setAttribute('aria-expanded', open?'true':'false'); });
+        function numField(labelTxt,key,min,max){
+          var lab=document.createElement('label'); lab.appendChild(document.createTextNode(labelTxt));
+          var inp=document.createElement('input'); inp.type='number'; inp.className='nar-num'; inp.min=String(min); inp.max=String(max); inp.step='1';
+          var w0=getRaw(); inp.value=(w0&&w0[key]!=null&&w0[key]!=='')?String(w0[key]):'';
+          inp.addEventListener('input',function(){ var w=ensureFn(); var v=parseInt(inp.value,10); w[key]=isNaN(v)?0:v; save(); });
+          lab.appendChild(inp); return lab;
+        }
+        var stats=document.createElement('div'); stats.className='nar-profstats';
+        stats.appendChild(numField('A','a',0,99));
+        stats.appendChild(numField('Quality','q',2,6));
+        stats.appendChild(numField('AP','ap',0,4));
+        stats.appendChild(numField('Blast','blast',0,12));
+        panel.appendChild(stats);
+        var pf=document.createElement('div'); pf.className='nar-profflags';
+        [['reliable','Reliable'],['relentless','Relentless'],['furious','Furious'],['surge','Surge'],['rending','Rending'],['indirect','Indirect']].forEach(function(f){
+          var lab=document.createElement('label'); var cb=document.createElement('input'); cb.type='checkbox'; var wf=getRaw(); cb.checked=!!(wf&&wf[f[0]]);
+          cb.addEventListener('change',function(){ var w=ensureFn(); w[f[0]]=cb.checked; save(); }); lab.appendChild(cb); lab.appendChild(document.createTextNode(f[1])); pf.appendChild(lab);
+        });
+        panel.appendChild(pf);
+        if(showHint){ var hint=document.createElement('p'); hint.className='muted small'; hint.style.margin='7px 0 0'; hint.textContent='With A & Quality set, the narrator rolls to-hit by the rules (AP/Rending recorded for your save step). Leave blank to narrate only. Hybrids: charge rolls the 🗡 melee profile, shoot rolls the 🔫 ranged profile.'; panel.appendChild(hint); }
+        pr.appendChild(tog); pr.appendChild(panel); return pr;
       }
-      var stats=document.createElement('div'); stats.className='nar-profstats';
-      stats.appendChild(numField('A','a',0,99));
-      stats.appendChild(numField('Quality','q',2,6));
-      stats.appendChild(numField('AP','ap',0,4));
-      stats.appendChild(numField('Blast','blast',0,12));
-      panel.appendChild(stats);
-      var pf=document.createElement('div'); pf.className='nar-profflags';
-      [['reliable','Reliable'],['relentless','Relentless'],['furious','Furious'],['surge','Surge'],['rending','Rending'],['indirect','Indirect']].forEach(function(f){
-        var lab=document.createElement('label'); var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!(u.weapon&&u.weapon[f[0]]);
-        cb.addEventListener('change',function(){ var w=ensureW(); w[f[0]]=cb.checked; save(); }); lab.appendChild(cb); lab.appendChild(document.createTextNode(f[1])); pf.appendChild(lab);
-      });
-      panel.appendChild(pf);
-      var hint=document.createElement('p'); hint.className='muted small'; hint.style.margin='7px 0 0'; hint.textContent='With A & Quality set, the narrator rolls to-hit by the rules (AP/Rending recorded for your save step). Leave blank to narrate only.';
-      panel.appendChild(hint);
-      pr.appendChild(tog); pr.appendChild(panel); card.appendChild(pr);
+      var isHybrid=(u.type==='hybrid');
+      card.appendChild(makeProfPanel(isHybrid?'🔫 ranged profile':'⚔ profile',
+        function(){return u.weapon;}, function(){ if(!u.weapon)u.weapon={a:0,q:0,ap:0}; return u.weapon; }, true));
+      if(isHybrid){
+        card.appendChild(makeProfPanel('🗡 melee profile',
+          function(){return u.weaponMelee;}, function(){ if(!u.weaponMelee)u.weaponMelee={a:0,q:0,ap:0}; return u.weaponMelee; }, false));
+      }
       box.appendChild(card);
     });
   }
@@ -330,6 +368,7 @@
     var minus=$('narObjMinus'), plus=$('narObjPlus');
     if(minus) minus.disabled=(state.objectives.length<=3);
     if(plus) plus.disabled=(state.objectives.length>=5);
+    var dr=$('narDefReminder'); if(dr) dr.hidden = !challengeDefBonus();
   }
 
   // ---------- decision trees (the legal logic — unchanged from the rules) ----------
@@ -347,16 +386,24 @@
     var rl=(u.rules||[]).map(function(r){return (r+'').toLowerCase();});
     function hasr(n){ return rl.some(function(r){return r.indexOf(n)>=0;}); }
     var flags={ fast:hasr('fast'), ambush:hasr('ambush'), scout:hasr('scout'), artillery:hasr('artillery'), aircraft:hasr('aircraft'), counter:hasr('counter'), caster:hasr('caster') };
-    var pool=(type==='melee'?melee:ranged); if(!pool.length) pool=weps;
-    var best=null,bn=-1; pool.forEach(function(w){ var n=(w.count||1)*(w.attacks||0); if(n>bn){bn=n;best=w;} });
-    var weapon={};
-    if(best){
-      weapon.a=(best.count||1)*(best.attacks||0); weapon.q=u.quality||4;
+    // F7: build a weapon profile from a weapon pool (reusable for ranged + melee on hybrids).
+    function buildWeapon(pool){
+      if(!pool || !pool.length) return null;
+      var best=null,bn=-1; pool.forEach(function(w){ var n=(w.count||1)*(w.attacks||0); if(n>bn){bn=n;best=w;} });
+      if(!best) return null;
+      var weapon={ a:(best.count||1)*(best.attacks||0), q:u.quality||4 };
       var srs=best.specialRules||[]; function sr(n){ for(var i=0;i<srs.length;i++) if((srs[i].name||'').toLowerCase()===n) return srs[i]; return null; }
       var ap=sr('ap'); weapon.ap=ap?ap.rating:0; var bl=sr('blast'); if(bl) weapon.blast=bl.rating;
       weapon.rending=!!sr('rending'); weapon.reliable=!!sr('reliable'); weapon.relentless=!!sr('relentless'); weapon.furious=!!sr('furious'); weapon.surge=!!sr('surge'); weapon.indirect=!!sr('indirect');
+      var dl=sr('deadly'); weapon.deadly=dl?(dl.rating||1):0; weapon.takedown=!!sr('takedown'); weapon.sniper=!!sr('sniper'); weapon.unstoppable=!!sr('unstoppable');
+      return weapon;
     }
-    return { name:u.name, type:type, section:1, flags:flags, weapon:weapon, cost:u.cost };
+    var wRanged=buildWeapon(ranged), wMelee=buildWeapon(melee);
+    var primaryPool=(type==='melee'?melee:ranged); if(!primaryPool.length) primaryPool=weps;
+    var weapon=buildWeapon(primaryPool)||{};
+    var out={ name:u.name, type:type, section:1, flags:flags, weapon:weapon, cost:u.cost };
+    if(type==='hybrid' && wRanged && wMelee){ out.weaponRanged=wRanged; out.weaponMelee=wMelee; }
+    return out;
   }
   function addOPRUnit(){ var as=$('narArmySel'), us=$('narUnitSel'); var uid=as&&as.value, ui=us&&us.value; if(!uid||ui===''||!ARMY[uid]) return; var u=ARMY[uid].units[parseInt(ui,10)]; if(u) addUnit(deriveOPR(u)); }
   // Load a fully-upgraded list baked from Army Forge (tools/import-list.js) -> replaces the AI army.
@@ -394,7 +441,7 @@
     if(a.ENCHG===undefined) return ask('ENCHG'); return a.ENCHG?act("Charge the nearest enemy.",'charge','chargeNear'):act("Rush toward the nearest enemy.",null,'rushEn');
   }
   function treeArtillery(u,a){ if(a.INRANGE===undefined) return ask('INRANGE'); return a.INRANGE?act("Hold and shoot the nearest valid target.",'shoot','holdShoot'):act("Hold position — no enemy in range.",null,'holdNone'); }
-  function treeFor(u){ if(u.flags.artillery) return treeArtillery; if(u.flags.aircraft) return treeShooting; return ({shooting:treeShooting,hybrid:treeHybrid,melee:treeMelee})[u.type]||treeHybrid; }
+  function treeFor(u){ if(u.flags.artillery || (u.type!=='melee' && u.weapon && (u.weapon.relentless || u.weapon.indirect))) return treeArtillery; if(u.flags.aircraft) return treeShooting; return ({shooting:treeShooting,hybrid:treeHybrid,melee:treeMelee})[u.type]||treeHybrid; }
 
   // ---------- PURE, testable to-hit resolver (Grimdark Future Quality test) ----------
   // weapon = {a, q, ap, reliable, relentless, furious, surge, blast, rending, indirect}
@@ -468,24 +515,28 @@
   }
   function pickUnit(){ var s=selectFromRoll(Math.floor(Math.random()*3)+1); if(!s) return null; s.unit=s.candidates[Math.floor(Math.random()*s.candidates.length)]; return s; }
 
-  var cur=null, ans={}, pendKey=null, curLast=false, objAuto=null, introQueue=[], introText='';
+  var cur=null, ans={}, pendKey=null, curLast=false, objAuto=null, introQueue=[], introText='', castDone=false, castResult=null, lastWasCharge=false;
 
   function renderPlay(){
     var onT=state.units.filter(onTable); var el=eligible();
     $('narRound').textContent=state.round;
     $('narLeft').textContent = state.units.length ? (el.length+' of '+onT.length+' still to activate') : 'Add units first';
-    $('narNext').disabled = !el.length;
+    $('narNext').disabled = ended || !el.length;
+    var nr=$('narNewRound'); if(nr) nr.disabled = ended;
+    renderScore();
     renderPoints();
   }
   function buildIntro(sel){
-    var head = sel.shifted ? ("Section "+sel.roll+"'s deserted — clockwise to section "+sel.sec+".") : ("Section "+sel.sec+".");
+    var head = sel.shifted
+      ? rnd(DESERT).replace(/\{r\}/g,sel.roll).replace(/\{s\}/g,sel.sec)
+      : ("Section "+sel.sec+".");
     return head+" Up steps "+sel.unit.name+", "+KEYNAMES[sel.unit.type].toLowerCase()+" by trade.";
   }
   function startActivation(){
     warm(); ensureAudio(); pendKey=null;
     var sel=pickUnit();
     if(!sel){ stageMsg("That's the lot — every unit's had its turn. Tap “New round”, Commander."); say("That is the lot. Your move, Commander.",{pitch:0.92},[pickBank('alldone')]); return; }
-    cur=sel.unit; ans={}; objAuto=null; curLast=(eligible().length===1);
+    cur=sel.unit; ans={}; objAuto=null; curLast=(eligible().length===1); castDone=false; castResult=null;
     drumroll();
     var intro=buildIntro(sel);
     introQueue=introIds(sel); introText=intro;
@@ -517,17 +568,57 @@
   function renderStep(intro){
     var note=prefillFromHUD(cur,ans); if(note) objAuto=note;
     var r=treeFor(cur)(cur,ans);
-    if(r.ask){ pendKey=r.ask; var q=Q[r.ask]; stageQuestion(intro,q,r.ask); consumeIntro([pickBank('q_'+r.ask)], q, {pitch:1,rate:1}); }
+    if(r.ask){
+      pendKey=r.ask;
+      var q=Q[r.ask];
+      if(r.ask==='CHGWAY') q = cur.flags.fast
+        ? "Close enough to charge? 16 inches (they're Fast)."
+        : "Close enough to charge? 12 inches.";
+      stageQuestion(intro,q,r.ask);
+      consumeIntro([pickBank('q_'+r.ask)], q, {pitch:1,rate:1});
+    }
     else finishAction(intro,r);
   }
   // A unit can have the narrator roll to-hit only if it has Attacks and a Quality.
-  function hasProfile(u){ return !!(u && u.weapon && parseInt(u.weapon.a,10)>0 && parseInt(u.weapon.q,10)>=2); }
+  // F7 dual-profile router: charge -> melee weapon, shoot -> ranged weapon; falls back to the
+  // single u.weapon when no split exists (every shooting-only / melee-only / legacy-saved unit).
+  function hasWeapon(w){ return !!(w && parseInt(w.a,10)>0 && parseInt(w.q,10)>=2); }
+  function profileFor(u, kind){
+    if(!u) return null;
+    if(kind==='charge' && u.weaponMelee) return u.weaponMelee;
+    if(kind==='shoot'  && u.weaponRanged) return u.weaponRanged;
+    return u.weapon||null;
+  }
+  function hasProfile(u){ return hasWeapon(profileFor(u,'shoot')) || hasWeapon(profileFor(u,'charge')); }
+  // ---- F1 caster cast sub-step (Solo&Co-Op p2): cast after moving, before attacking ----
+  // Tap-driven like runCombatPrompts. Level defaults to 1 (no per-unit level field) -> D3+1.
+  function casterLevel(u){ var L=parseInt(u&&u.flags&&u.flags.casterLevel,10); return (isNaN(L)||L<1)?1:L; }
+  function runCastPrompts(intro, r){
+    var u=cur, lvl=casterLevel(u), die=Math.floor(Math.random()*3)+1, sel=die+lvl;
+    sting();
+    // Q1: can it actually go off? (player owns "valid target in LoS + enough tokens" -> 4+ resolves)
+    stageCombatYN(intro, u.name+': spell #'+sel+' selected (D3+'+lvl+'='+sel+'). Valid target in line of sight, and a 4+ to cast?', function(ok){
+      if(ok){
+        castResult={cast:true, spell:sel, line:u.name+' unleash spell #'+sel+' (D3+'+lvl+'='+sel+') on a target in line of sight.'};
+        logAdd(u.name+': casts spell #'+sel+' (D3+'+lvl+'='+sel+') — resolved on a LoS target.');
+      } else {
+        castResult={cast:false, spell:sel, line:u.name+' cycle the spell list — no valid target or the casting fizzles. No spell this turn.'};
+        logAdd(u.name+': cast fizzles (spell #'+sel+', no valid target / failed) — cycles, casts nothing.');
+      }
+      castDone=true;
+      finishAction(intro, r);   // re-enter; castDone short-circuits the caster branch, combat proceeds
+    });
+    consumeIntro([pickBank('cast')], u.name+' raises a hand — spell number '+sel+'. Is there a target in sight, and does it cast on a four or more?', {pitch:0.9,rate:0.96});
+  }
   function finishAction(intro, r){
     pendKey=null;
     var u=cur;
+    // Caster: cast AFTER moving, BEFORE attacking (Solo&Co-Op p2). One tap-driven sub-step, then continue.
+    if(u.flags.caster && !castDone){ runCastPrompts(intro, r); return; }
     // Weapon-profile path: gather what the app can know, prompt for the rest, then roll.
-    if(hasProfile(u) && (r.kind==='shoot' || r.kind==='charge')){
-      var w=u.weapon;
+    if(hasWeapon(profileFor(u, r.kind)) && (r.kind==='shoot' || r.kind==='charge')){
+      var prof=profileFor(u, r.kind);
+      var w=prof;
       var ctx={
         rng:function(){return Math.floor(Math.random()*6)+1;},
         isCharge:(r.kind==='charge'),
@@ -541,28 +632,29 @@
       if(u.flags.artillery || (w.relentless && ctx.isHold)){
         queue.push({type:'yn', key:'over9', q:'Target over 9 inches away?'});
       }
-      // firstMelee: every charge with a profile (Fatigue is melee-wide; Furious keys off charge).
+      // firstMelee: ASK. Fatigue also comes from a strike-back on the human's turn (a unit charged
+      // before it activates), which is off-app — so the human must tell us, we can't infer it.
       if(ctx.isCharge){
-        queue.push({type:'yn', key:'firstMelee', q:'First melee for '+u.name+' this round?'});
+        queue.push({type:'yn', key:'firstMelee', q:'First melee for '+u.name+' this round? (No = already fought → fatigued, 6s only)'});
       }
       // targetModels: Blast(X) caps multiplied hits at models in the target.
       if(parseInt(w.blast,10)>1){
         queue.push({type:'num', key:'targetModels', q:'How many models in the target unit?'});
       }
-      runCombatPrompts(intro, r, ctx, queue, 0);
+      runCombatPrompts(intro, r, ctx, queue, 0, prof);
       return;
     }
     finalizeAction(intro, r, null);
   }
   // Ask combat-only questions one at a time (tap-driven; isolated from the tree's pendKey).
-  function runCombatPrompts(intro, r, ctx, queue, i){
+  function runCombatPrompts(intro, r, ctx, queue, i, prof){
     if(i>=queue.length){
-      var res=resolveHits(cur.weapon, ctx);
-      finalizeAction(intro, r, res);
+      var res=resolveHits(prof||cur.weapon, ctx);
+      finalizeAction(intro, r, res, prof);
       return;
     }
     var step=queue[i];
-    var advance=function(val){ ctx[step.key]=val; runCombatPrompts(intro, r, ctx, queue, i+1); };
+    var advance=function(val){ ctx[step.key]=val; runCombatPrompts(intro, r, ctx, queue, i+1, prof); };
     if(step.type==='num') stageCombatNum(intro, step.q, advance);
     else stageCombatYN(intro, step.q, advance);
     consumeIntro([], step.q, {pitch:1,rate:1});
@@ -612,34 +704,63 @@
     var rid = destroyed? pickBank('react_wipe') : (dmg<=0? pickBank('react_none') : (half? pickBank('react_heavy') : pickBank('react_some')));
     var moraleId = (half && !destroyed)? pickBank('morale') : null;
     var ids=[]; if(dmg>0) ids.push('num_'+dmg); if(rid) ids.push(rid); if(moraleId) ids.push(moraleId);
+    // F3: distinguish Rout (melee fail at half = removed) vs Shaken (ranged fail). The triggering action
+    // is melee when the AI's last action was a charge; the melee loser tests regardless of casualties.
+    var moraleLine = half ? (lastWasCharge
+        ? ' — melee at half: test morale (fail = ROUT, removed). Loser of the melee tests regardless of casualties.'
+        : ' — at half: test morale (fail = SHAKEN: can’t seize/contest objectives; auto-fails further morale).')
+      : '.';
     var box=$('narReport');
-    if(box){ var status = destroyed? (esc(t.name)+' — destroyed.') : (esc(t.name)+': '+remaining+' of '+t.cap+' left'+(half?' — at half: test morale (fail = Shaken; Rout in melee).':'.'));
+    if(box){ var status = destroyed? (esc(t.name)+' — destroyed.') : (esc(t.name)+': '+remaining+' of '+t.cap+' left'+moraleLine);
       box.innerHTML='<p class="nar-react">▸ '+esc((dmg>0?numWord(dmg)+' taken. ':'')+clipText(rid))+'</p><p class="muted small">'+status+'</p>'; }
     logAdd('  ↳ '+t.name+': '+dmg+' dmg → '+remaining+'/'+t.cap+(destroyed?' DESTROYED':(half?' (half)':'')));
-    say((dmg>0?numWord(dmg)+' taken. ':'')+clipText(rid)+(moraleId?' '+clipText(moraleId):''),{pitch:0.86,rate:0.95}, ids);
+    var heldTxt=(dmg>0 && !destroyed && !half)? ' '+rnd(HELDLINE) : '';
+    say((dmg>0?numWord(dmg)+' taken. ':'')+clipText(rid)+(moraleId?' '+clipText(moraleId):'')+heldTxt,{pitch:0.86,rate:0.95}, ids);
   }
-  function finalizeAction(intro, r, hitRes){
+  // F2: unit-aware, ordered targeting checklist. Reads the activating unit's weapon (ap/blast)
+  // + override flags and surfaces ONLY the priorities that apply, in official resolution order.
+  // App is board-blind, so the human still picks the actual model — this just makes the pick rules-correct.
+  function targetChecklist(u, isCharge){
+    var w=u.weapon||{}, lines=[], n=1;
+    function step(s){ lines.push((n++)+'. '+s); }
+    // Override priorities resolve FIRST (they pre-empt "nearest").
+    if(w.unstoppable) step('Unstoppable: target an enemy Aircraft first, if any.');
+    if(w.takedown||w.sniper) step('Takedown/Sniper: target Heroes first, then models with the most expensive upgrade.');
+    var dl=parseInt(w.deadly,10)||0;
+    if(dl>1) step('Deadly('+dl+'): single-model Tough units first, then any Tough unit — lowest total remaining Tough.');
+    var ap=parseInt(w.ap,10)||0;
+    if(ap>0) step('AP('+ap+'): among the rest, pick the enemy with the best Defense.');
+    // Base rule always applies as the fallback / tie-breaker.
+    step(isCharge ? 'Otherwise: the NEAREST valid enemy — prefer one not yet activated; the AI strikes first.'
+                  : 'Otherwise: the NEAREST valid enemy — prefer not-yet-activated, and the OPEN target over one in cover.');
+    if(parseInt(w.blast,10)>1) step('Blast('+w.blast+') ignores cover — let cover stop nothing when choosing.');
+    return (isCharge?'Charge target — work down this list:':'Shoot target — work down this list:')+' '+lines.join('  ');
+  }
+  function finalizeAction(intro, r, hitRes, prof){
     var u=cur;
     var head=rnd(LINES[r.id]||["{u} act."]).replace(/\{u\}/g,u.name);
     var extra=[];
     if(objAuto) extra.push(objAuto);
     if(u.flags.aircraft) extra.push("Moves 30\" in a straight line (Aircraft).");
-    if(r.kind==='shoot') extra.push("Target: the nearest valid enemy — you pick it (not-yet-activated, open over cover); AP→best Defense, Deadly→Tough, Takedown→heroes.");
-    if(r.kind==='charge') extra.push("Charge: the nearest valid enemy — you pick it; the AI strikes first.");
-    if(u.flags.caster) extra.push("Then cast: roll D3 + caster level for a random spell (4+, target in line of sight).");
+    if(r.kind==='shoot') extra.push(targetChecklist(u, false));
+    if(r.kind==='charge') extra.push(targetChecklist(u, true));
+    if(u.flags.counter) extra.push("Counter: if YOU charge this unit, it strikes first — resolve its attacks before your chargers'.");
+    if(u.flags.caster){ extra.push(castResult ? ('Cast: '+castResult.line) : "Then cast: roll D3 + caster level for a random spell (4+, target in line of sight)."); }
     var notes=ruleNotes(u); if(hitRes) notes=notes.concat(hitRes.notes);
-    var th=hitRes? threatOf(u.weapon, hitRes) : null;
+    var th=hitRes? threatOf(prof||u.weapon, hitRes) : null;
     var menaceId = th ? (th.hits===0? pickBank('whiff') : pickBank('menace_'+th.tier)) : null;
     var vids=[]; if(curLast){ var ls=pickBank('laststand'); if(ls) vids.push(ls); }
     var av=pickBank('act_'+r.id); if(av) vids.push(av);
     if(th){ if(th.hits>0){ vids.push('num_'+th.hits,'w_hits'); } if(menaceId) vids.push(menaceId); }
-    var verdictTxt=(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head+(th&&th.hits>0? ' '+numWord(th.hits)+' hits.':'')+(menaceId? ' '+clipText(menaceId):'');
+    var whiffTxt=(th && th.hits===0)? ' '+rnd(WHIFFLINE) : '';
+    var verdictTxt=(curLast? rnd(LASTSTAND)+' ' : '')+'… '+head+(th&&th.hits>0? ' '+numWord(th.hits)+' hits.':'')+whiffTxt+(menaceId? ' '+clipText(menaceId):'');
     var hits = th? th.hits : 0;
     u.activated=true; save(); renderArmy();
     if(r.kind==='charge') sting();
     stageResult(intro, head, r.action, extra.concat(notes), curLast, hitRes, th, hits>0);
     logAdd(u.name+": "+r.action+(th?(' ['+hits+' hit'+(hits===1?'':'s')+']'):''));
     consumeIntro(vids, verdictTxt, {pitch:0.86,rate:0.93});
+    lastWasCharge=(r.kind==='charge');
     if(hits>0) renderTargetPicker();
     cur=null; curLast=false; renderPlay();
   }
@@ -711,10 +832,53 @@
       return "We hold more ground than you, "+ai+" to your "+me+" — plus one to hit, and we'll be insufferable about it.";
     return "We hold as much ground as you, "+ai+" apiece — the lads fight with extra venom, plus one to hit.";
   }
+  // ---- F9: end-of-round objective tally + win-check (player-maintained HUD, board-blind) ----
+  var FINAL_ROUND=4; // AdvancedRules: "After 4 rounds have been played the game ends."
+  // The narrator never wins by destroying the army (AdvancedRules L111); objectives decide.
+  function objectiveVerdict(){
+    var ai=aiObjectives(), me=myObjectives();
+    if(!objectivesTouched()) return {ai:ai,me:me,leader:'untracked'};
+    return {ai:ai, me:me, leader:(ai>me?'ai':(me>ai?'me':'tie'))};
+  }
+  // Spoken/printed scoreline for the round that just finished (called from newRound BEFORE the increment, and at game end).
+  function scoreLine(roundJustEnded){
+    var v=objectiveVerdict();
+    if(v.leader==='untracked')
+      return 'End of round '+roundJustEnded+': objectives untracked — tap the markers and I\'ll keep the tally.';
+    var lead = v.leader==='ai' ? 'the machine leads' : (v.leader==='me' ? 'you lead' : 'dead level');
+    return 'End of round '+roundJustEnded+': objectives '+v.ai+' to '+v.me+' — '+lead+'.';
+  }
+  function gameOver(){
+    var v=objectiveVerdict();
+    var winner = (v.leader==='ai')?'The machine holds the field — AI wins on objectives.'
+               : (v.leader==='me')?'You hold the field — victory is yours, Commander.'
+               : (v.leader==='tie')?'Objectives dead level — a bloody draw.'
+               : 'Four rounds done. Count your markers, Commander — most held wins.';
+    return 'Four rounds fought. '+winner;
+  }
+  function renderScore(){
+    var el=$('narScore'); if(!el) return;
+    if(ended){ el.innerHTML='<b>'+esc(gameOver())+'</b>'; return; }
+    var v=objectiveVerdict();
+    el.textContent = v.leader==='untracked' ? '' :
+      ('Objectives so far: AI '+v.ai+' · You '+v.me+(v.leader==='tie'?' (level)':(v.leader==='ai'?' (AI ahead)':' (you ahead)')));
+  }
   function newRound(){
     ensureAudio();
+    if(ended){ stageMsg(gameOver()); return; }
+    // Score the round that is ENDING (state.round still = the round just played).
+    var roundEnding=state.round, sline=scoreLine(roundEnding);
+    logAdd('— '+sline);
+    // After 4 rounds, the game ends — objectives decide the winner (AdvancedRules L110).
+    if(roundEnding>=FINAL_ROUND){
+      ended=true; save();
+      var go=gameOver();
+      stageMsg(go); say(go,{pitch:0.95}, [pickBank('alldone')]); renderPlay(); renderScore();
+      var lf=$('narLog'); var hf=document.createElement('div'); hf.className='nar-logsep'; hf.textContent='— GAME OVER (R'+roundEnding+') —'; lf.insertBefore(hf,lf.firstChild);
+      return;
+    }
     state.round++; state.units.forEach(function(u){u.activated=false;}); save(); renderArmy();
-    var parts=['Round '+state.round+'.']; var rids=['round_'+state.round];
+    var parts=['Round '+state.round+'.', sline]; var rids=['round_'+state.round];
     if(state.round===2 && state.units.some(function(u){return u.flags.ambush;})){ parts.push('Loose the ambushers now — somewhere rude, over 9 inches from your lot.'); var ab=pickBank('ambush'); if(ab) rids.push(ab); }
     parts.push(challengeLine());
     var bstate = !objectivesTouched() ? 'untracked' : (challengeDefBonus() ? 'behind' : (aiObjectives()>myObjectives() ? 'ahead' : 'level'));
@@ -754,7 +918,7 @@
     });
   }
 
-  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible,challengeHitBonus:challengeHitBonus,challengeDefBonus:challengeDefBonus,prefillFromHUD:prefillFromHUD,objectivesTouched:objectivesTouched,aiObjectives:aiObjectives,myObjectives:myObjectives,sanitizeObjectives:sanitizeObjectives,setObjCount:setObjCount,cycleObjective:cycleObjective,challengeLine:challengeLine,resolveHits:resolveHits,hasProfile:hasProfile}; // self-test
+  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible,challengeHitBonus:challengeHitBonus,challengeDefBonus:challengeDefBonus,prefillFromHUD:prefillFromHUD,objectivesTouched:objectivesTouched,aiObjectives:aiObjectives,myObjectives:myObjectives,sanitizeObjectives:sanitizeObjectives,setObjCount:setObjCount,cycleObjective:cycleObjective,challengeLine:challengeLine,resolveHits:resolveHits,hasProfile:hasProfile,profileFor:profileFor,hasWeapon:hasWeapon,deriveOPR:deriveOPR,objectiveVerdict:objectiveVerdict,scoreLine:scoreLine,gameOver:gameOver}; // self-test
 
   load();
   $('narAdd').addEventListener('click',function(){ addUnit(); });
