@@ -98,11 +98,44 @@ function mergeAF(units) {
   return out;
 }
 
+// --- player roster (--player): one entry per unit = {name, total wounds}, wounds = models x Tough ---
+function parseId(a) { const m = (a || '').match(/[?&]id=([^&]+)/); return m ? m[1] : (a || '').trim(); }
+function toughVal(u) {
+  const r = (u.rules || []).find(x => ((x.name || x.label || x) + '').toLowerCase() === 'tough');
+  const v = r && (r.rating != null ? r.rating : r.value);
+  return parseInt(v, 10) > 0 ? parseInt(v, 10) : 1;
+}
+// Total wounds for a unit = model count x per-model Tough (1 if not Tough). mergeAF runs first so
+// combined units / joined heroes contribute their summed size.
+function playerUnit(u) { return { name: (u.customName || u.name), wounds: (u.size || 1) * toughVal(u) }; }
+
 // Export the pure transforms for unit tests; the network IIFE only runs when invoked directly.
-module.exports = { derive, mergeAF, totalA };
+module.exports = { derive, mergeAF, totalA, parseId, toughVal, playerUnit };
 
 if (require.main === module) (async () => {
-  if (!id) { console.error('Usage: node tools/import-list.js <army-forge-share-link-or-id>'); process.exit(2); }
+  const argv = process.argv.slice(2);
+  // ---- player roster mode: --player <link> [<link2> <link3>] -> data/player-armies.json (up to 3) ----
+  if (argv.includes('--player')) {
+    const links = argv.filter(a => a !== '--player').slice(0, 3);
+    if (!links.length) { console.error('Usage: node tools/import-list.js --player <army-forge-link-or-id> [<link2> <link3>]'); process.exit(2); }
+    const armies = [];
+    for (const link of links) {
+      const pid = parseId(link);
+      const r = await get('/api/tts?id=' + encodeURIComponent(pid));
+      if (r.status !== 200) { console.error('fetch failed for ' + pid + ': HTTP ' + r.status); continue; }
+      let list; try { list = JSON.parse(r.body); } catch (e) { console.error('not JSON for ' + pid + ' (bad id?)'); continue; }
+      const units = mergeAF(list.units).map(playerUnit);
+      armies.push({ name: list.name, source: pid, units });
+      console.log('Player army "' + list.name + '": ' + units.length + ' units, ' + units.reduce((s, u) => s + u.wounds, 0) + ' total wounds');
+      units.forEach(u => console.log('  ' + u.name + '  (' + u.wounds + ' wounds)'));
+    }
+    if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true });
+    fs.writeFileSync(path.join(DATA, 'player-armies.json'), JSON.stringify({ armies }));
+    console.log('-> data/player-armies.json (' + armies.length + ' army' + (armies.length === 1 ? '' : 'ies') + ')');
+    return;
+  }
+  // ---- default: AI import -> data/ai-army.json ----
+  if (!id) { console.error('Usage: node tools/import-list.js <army-forge-link-or-id>   |   --player <link> [<link2> <link3>]'); process.exit(2); }
   const r = await get('/api/tts?id=' + encodeURIComponent(id));
   if (r.status !== 200) { console.error('fetch failed: HTTP ' + r.status); process.exit(2); }
   let list; try { list = JSON.parse(r.body); } catch (e) { console.error('not JSON (bad id?)'); process.exit(2); }

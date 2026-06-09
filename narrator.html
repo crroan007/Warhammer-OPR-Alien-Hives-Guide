@@ -134,6 +134,16 @@
   </section>
 
   <section class="unit">
+    <h2>Your Forces</h2>
+    <p class="muted small" style="margin-top:0">Register up to 3 of your own (co-op) armies and their units once. When the AI lands a hit, the target picker becomes a dropdown of these units with wounds pre-filled — no more typing name + wounds every time. <em>Wounds = model count for a squad, Tough for a single tough model, or models × Tough for a tough squad.</em></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px">
+      <button id="narRosterLoad" class="nar-btn ghost">Load my Army Forge lists</button>
+      <button id="narRosterAdd" class="nar-btn">+ Army</button>
+    </div>
+    <div id="narRoster"></div>
+  </section>
+
+  <section class="unit">
     <h2>Run the AI Turn</h2>
     <div class="nar-roundbar"><span>Round <b id="narRound">1</b></span><button id="narNewRound" class="nar-btn ghost">New round</button><span id="narLeft" class="muted small"></span></div>
     <div id="narScore" class="muted small" style="margin:4px 0 0"></div>
@@ -259,11 +269,11 @@
     if(out.length>5) out=out.slice(0,5);
     return out;
   }
-  var state={round:1,seq:0,units:[],objectives:defaultObjectives(3),targets:[]};
+  var state={round:1,seq:0,units:[],objectives:defaultObjectives(3),targets:[],roster:[]};
   var ended=false; // F9: game-over latch (set true after round 4)
   var LSK='oprNarratorArmy';
   function save(){ try{ localStorage.setItem(LSK, JSON.stringify(state)); }catch(e){} }
-  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; state.objectives=sanitizeObjectives(p.objectives); state.targets=Array.isArray(p.targets)?p.targets:[]; } } }catch(e){} }
+  function load(){ try{ var s=localStorage.getItem(LSK); if(s){ var p=JSON.parse(s); if(p&&p.units){ state.units=p.units; state.round=p.round||1; state.seq=p.seq||p.units.length; state.objectives=sanitizeObjectives(p.objectives); state.targets=Array.isArray(p.targets)?p.targets:[]; state.roster=Array.isArray(p.roster)?p.roster:[]; } } }catch(e){} }
   function nextId(){ state.seq=(state.seq||0)+1; return 'u'+state.seq; }
   function onTable(u){ return !(u.flags.ambush && state.round<2); }
 
@@ -408,6 +418,74 @@
   function addOPRUnit(){ var as=$('narArmySel'), us=$('narUnitSel'); var uid=as&&as.value, ui=us&&us.value; if(!uid||ui===''||!ARMY[uid]) return; var u=ARMY[uid].units[parseInt(ui,10)]; if(u) addUnit(deriveOPR(u)); }
   // Load a fully-upgraded list baked from Army Forge (tools/import-list.js) -> replaces the AI army.
   function loadImported(){ fetch('data/ai-army.json').then(function(r){return r.ok?r.json():null;}).then(function(L){ if(!L||!L.units||!L.units.length){ stageMsg('No imported list found. Run: node tools/import-list.js <army-forge-share-link>'); return; } state.units=[]; L.units.forEach(function(u){ pushUnit(u); }); save(); renderArmy(); renderPlay(); if($('narLog'))$('narLog').innerHTML=''; stageMsg('Imported "'+L.name+'" — '+L.units.length+' units, '+(L.points||'?')+' pts. Tap "Next AI Activation".'); }).catch(function(){ stageMsg('Could not load imported list.'); }); }
+
+  // ---- Your Forces: a player roster (max 3 armies) used to pre-fill the AI target picker ----
+  // Mirrors the AI Army picker (ARMY cache, data/armies-index.json + data/armies/<uid>.json).
+  var ARMYIDX=null; // cached [{uid,name}] for the per-card official picker
+  function fillArmyIndexSelect(sel){
+    if(!sel) return;
+    if(ARMYIDX){ sel.innerHTML='<option value="">— choose an OPR army —</option>'; ARMYIDX.forEach(function(a){ var o=document.createElement('option'); o.value=a.uid; o.textContent=a.name; sel.appendChild(o); }); return; }
+    sel.innerHTML='<option value="">loading armies…</option>';
+    fetch('data/armies-index.json').then(function(r){return r.ok?r.json():[];}).then(function(idx){ ARMYIDX=idx||[]; fillArmyIndexSelect(sel); }).catch(function(){ sel.innerHTML='<option value="">army list unavailable</option>'; });
+  }
+  function fillRosterUnitSelect(sel,uid){
+    if(!sel) return;
+    if(!uid){ sel.innerHTML='<option value="">— pick an army —</option>'; return; }
+    if(ARMY[uid]){ sel.innerHTML=''; (ARMY[uid].units||[]).forEach(function(u,i){ var o=document.createElement('option'); o.value=i; o.textContent=u.name+' — '+u.cost+'pts'; sel.appendChild(o); }); return; }
+    sel.innerHTML='<option value="">loading…</option>';
+    fetch('data/armies/'+uid+'.json').then(function(r){return r.ok?r.json():null;}).then(function(b){ if(b){ ARMY[uid]=b; fillRosterUnitSelect(sel,uid); } else sel.innerHTML='<option value="">unavailable</option>'; }).catch(function(){ sel.innerHTML='<option value="">unavailable</option>'; });
+  }
+  function rosterUnitWounds(u){ // total wounds default = model count for the picked OPR unit
+    return Math.max(1, parseInt(u && u.size, 10) || 1);
+  }
+  function addRosterArmy(){ if(state.roster.length>=3) return; state.roster.push({name:'My Army '+(state.roster.length+1), source:'manual', units:[]}); save(); renderRoster(); }
+  function removeRosterArmy(ai){ state.roster.splice(ai,1); save(); renderRoster(); }
+  function addRosterUnit(ai,unit){ var a=state.roster[ai]; if(!a) return; if(!Array.isArray(a.units)) a.units=[]; a.units.push(unit||{name:'',wounds:1}); save(); renderRoster(); }
+  function removeRosterUnit(ai,ui){ var a=state.roster[ai]; if(!a||!a.units) return; a.units.splice(ui,1); save(); renderRoster(); }
+  function loadPlayerArmies(){
+    return fetch('data/player-armies.json').then(function(r){return r.ok?r.json():null;}).then(function(L){
+      if(!L||!Array.isArray(L.armies)||!L.armies.length){ stageMsg('No player lists found. Run: node tools/import-list.js --player <army-forge-share-link>'); return; }
+      state.roster=L.armies.slice(0,3).map(function(a){ return { name:a.name||'My Army', source:a.source||'army-forge', units:(a.units||[]).map(function(u){ return { name:u.name||'Unit', wounds:Math.max(1,parseInt(u.wounds,10)||1) }; }) }; });
+      save(); renderRoster();
+      var n=state.roster.reduce(function(s,a){return s+(a.units?a.units.length:0);},0);
+      stageMsg('Loaded '+state.roster.length+' of your armies ('+n+' units). The target picker now lists them.');
+    }).catch(function(){ stageMsg('Could not load data/player-armies.json.'); });
+  }
+  function renderRoster(){
+    var box=$('narRoster'); if(!box) return; box.innerHTML='';
+    var addBtn=$('narRosterAdd'); if(addBtn) addBtn.disabled = state.roster.length>=3;
+    if(!state.roster.length){ box.innerHTML='<p class="muted small">No forces registered yet — tap <strong>+ Army</strong> to add one, or <strong>Load my Army Forge lists</strong>.</p>'; return; }
+    state.roster.forEach(function(army,ai){
+      if(!Array.isArray(army.units)) army.units=[];
+      var card=document.createElement('div'); card.className='nar-unit';
+      // header row: army name + remove
+      var hr=document.createElement('div'); hr.className='nar-row';
+      var anm=document.createElement('input'); anm.type='text'; anm.value=army.name||''; anm.className='nar-name'; anm.placeholder='army name'; anm.addEventListener('input',function(){ army.name=anm.value; save(); });
+      var arm=document.createElement('button'); arm.className='nar-x'; arm.textContent='✕'; arm.title='Remove army'; arm.addEventListener('click',function(){ removeRosterArmy(ai); });
+      hr.appendChild(anm); hr.appendChild(arm); card.appendChild(hr);
+      // unit rows
+      army.units.forEach(function(unit,ui){
+        var ur=document.createElement('div'); ur.className='nar-row';
+        var un=document.createElement('input'); un.type='text'; un.value=unit.name||''; un.className='nar-name'; un.placeholder='unit name'; un.addEventListener('input',function(){ unit.name=un.value; save(); });
+        var uw=document.createElement('input'); uw.type='number'; uw.min='1'; uw.max='99'; uw.step='1'; uw.className='nar-num2'; uw.value=String(Math.max(1,parseInt(unit.wounds,10)||1)); uw.title='wounds'; uw.addEventListener('input',function(){ var v=parseInt(uw.value,10); unit.wounds=isNaN(v)?1:Math.max(1,v); save(); });
+        var ux=document.createElement('button'); ux.className='nar-x'; ux.textContent='✕'; ux.title='Remove unit'; ux.addEventListener('click',function(){ removeRosterUnit(ai,ui); });
+        ur.appendChild(un); ur.appendChild(uw); ur.appendChild(ux); card.appendChild(ur);
+      });
+      // manual + unit button
+      var mb=document.createElement('button'); mb.className='nar-btn ghost'; mb.textContent='+ unit'; mb.style.marginTop='4px'; mb.addEventListener('click',function(){ addRosterUnit(ai,{name:'',wounds:1}); });
+      card.appendChild(mb);
+      // official OPR army picker row (mirrors the AI picker)
+      var pr=document.createElement('div'); pr.className='nar-build'; pr.style.marginTop='8px';
+      var asel=document.createElement('select'); fillArmyIndexSelect(asel);
+      var usel=document.createElement('select'); usel.innerHTML='<option value="">— pick an army —</option>';
+      asel.addEventListener('change',function(){ fillRosterUnitSelect(usel, asel.value); });
+      var pAdd=document.createElement('button'); pAdd.className='nar-btn'; pAdd.textContent='+ Add to this army';
+      pAdd.addEventListener('click',function(){ var uid=asel.value, idx=usel.value; if(!uid||idx===''||!ARMY[uid]) return; var u=ARMY[uid].units[parseInt(idx,10)]; if(u) addRosterUnit(ai,{name:u.name, wounds:rosterUnitWounds(u)}); });
+      pr.appendChild(asel); pr.appendChild(usel); pr.appendChild(pAdd);
+      card.appendChild(pr);
+      box.appendChild(card);
+    });
+  }
 
   var Q={
     OBJ:"Any objective still going spare that this lot could make for?",
@@ -677,9 +755,25 @@
     var live=state.targets.filter(function(t){ return (t.cap-(t.taken||0))>0; });
     var h='<span class="muted small">Hit landed — which unit?</span> ';
     live.forEach(function(t){ h+='<button class="nar-btn ghost" data-tid="'+t.id+'">'+esc(t.name)+' ('+(t.cap-(t.taken||0))+'/'+t.cap+')</button>'; });
+    // Roster dropdown: registered units (Your Forces) not already a live target, grouped by army.
+    var liveNames={}; live.forEach(function(t){ liveNames[t.name]=true; });
+    var groups='', nRoster=0;
+    (state.roster||[]).forEach(function(army){
+      var opts='';
+      (army.units||[]).forEach(function(u){
+        if(!u||!u.name||!(u.name+'').trim()) return;
+        if(liveNames[u.name]) return; // already a live target
+        var w=Math.max(1,parseInt(u.wounds,10)||1);
+        opts+='<option value="'+esc(u.name)+'" data-w="'+w+'">'+esc(u.name)+' ('+w+')</option>'; nRoster++;
+      });
+      if(opts) groups+='<optgroup label="'+esc(army.name||'Army')+'">'+opts+'</optgroup>';
+    });
+    if(nRoster){ h+='<select class="nar-sel" id="narTPick"><option value="">— your forces —</option>'+groups+'</select>'; }
     h+='<button class="nar-btn ghost" data-tnew="1">+ new</button>';
     box.innerHTML=h;
     Array.prototype.forEach.call(box.querySelectorAll('[data-tid]'),function(b){ b.addEventListener('click',function(){ var id=b.getAttribute('data-tid'), t=null,i; for(i=0;i<state.targets.length;i++) if(state.targets[i].id===id) t=state.targets[i]; if(t) askDamage(t); }); });
+    var sel=box.querySelector('#narTPick');
+    if(sel) sel.addEventListener('change',function(){ var opt=sel.options[sel.selectedIndex]; if(!opt||!opt.value) return; var w=parseInt(opt.getAttribute('data-w'),10)||1; askDamage(pushTarget(opt.value, w)); });
     var nb=box.querySelector('[data-tnew]'); if(nb) nb.addEventListener('click',renderNewTarget);
   }
   function renderNewTarget(){
@@ -918,7 +1012,9 @@
     });
   }
 
-  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible,challengeHitBonus:challengeHitBonus,challengeDefBonus:challengeDefBonus,prefillFromHUD:prefillFromHUD,objectivesTouched:objectivesTouched,aiObjectives:aiObjectives,myObjectives:myObjectives,sanitizeObjectives:sanitizeObjectives,setObjCount:setObjCount,cycleObjective:cycleObjective,challengeLine:challengeLine,resolveHits:resolveHits,hasProfile:hasProfile,profileFor:profileFor,hasWeapon:hasWeapon,deriveOPR:deriveOPR,objectiveVerdict:objectiveVerdict,scoreLine:scoreLine,gameOver:gameOver}; // self-test
+  window.__nar={state:state,selectFromRoll:selectFromRoll,treeShooting:treeShooting,treeHybrid:treeHybrid,treeMelee:treeMelee,treeArtillery:treeArtillery,treeFor:treeFor,pushUnit:pushUnit,eligible:eligible,challengeHitBonus:challengeHitBonus,challengeDefBonus:challengeDefBonus,prefillFromHUD:prefillFromHUD,objectivesTouched:objectivesTouched,aiObjectives:aiObjectives,myObjectives:myObjectives,sanitizeObjectives:sanitizeObjectives,setObjCount:setObjCount,cycleObjective:cycleObjective,challengeLine:challengeLine,resolveHits:resolveHits,hasProfile:hasProfile,profileFor:profileFor,hasWeapon:hasWeapon,deriveOPR:deriveOPR,objectiveVerdict:objectiveVerdict,scoreLine:scoreLine,gameOver:gameOver,addRosterArmy:addRosterArmy,addRosterUnit:addRosterUnit,loadPlayerArmies:loadPlayerArmies,renderTargetPicker:renderTargetPicker,pushTarget:pushTarget,renderRoster:renderRoster}; // self-test
+  // roster is reassigned by loadPlayerArmies(); expose a live getter so it never goes stale.
+  try{ Object.defineProperty(window.__nar,'roster',{get:function(){return state.roster;},enumerable:true,configurable:true}); }catch(e){ window.__nar.roster=state.roster; }
 
   load();
   $('narAdd').addEventListener('click',function(){ addUnit(); });
@@ -927,12 +1023,14 @@
   if($('narArmySel')) $('narArmySel').addEventListener('change',function(){ loadArmy(this.value); });
   if($('narAddUnit')) $('narAddUnit').addEventListener('click',addOPRUnit);
   if($('narImport')) $('narImport').addEventListener('click',loadImported);
+  if($('narRosterAdd')) $('narRosterAdd').addEventListener('click',addRosterArmy);
+  if($('narRosterLoad')) $('narRosterLoad').addEventListener('click',loadPlayerArmies);
   $('narNext').addEventListener('click',startActivation);
   $('narNewRound').addEventListener('click',newRound);
   $('narObjMinus').addEventListener('click',function(){ setObjCount(state.objectives.length-1); });
   $('narObjPlus').addEventListener('click',function(){ setObjCount(state.objectives.length+1); });
   wireMic();
-  renderArmy(); renderObjectives(); renderPlay();
+  renderArmy(); renderObjectives(); renderPlay(); renderRoster();
   stageMsg(state.units.length?'Tap “Next AI Activation” to unleash the machine.':'Muster the AI army (or load the HDF sample), then tap “Next AI Activation”.');
 })();
 </script>
