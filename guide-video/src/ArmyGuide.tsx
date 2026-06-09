@@ -45,110 +45,147 @@ type Unit = {
 
 const UNITS: Unit[] = [
   {
-    name: "Carnivo-Rex",
+    name: "Fortress Tank",
     count: "[1]",
     q: "4+",
     d: "2+",
-    tag: "HAMMER",
+    tag: "ANCHOR · CARRIES BERSERKERS",
     tagColor: C.acc,
-    dice: "MELEE: roll 13 dice @ 4+  (9 claws + 4 stomp)",
+    dice: "SHOOT: 16 dice @ 4+  (C-Beamer AP2 + Minigun + 4× Rifle)  ·  Impact(9)",
     use: [
-      "Advance up the middle beside the Toxico — grind his army rounds 1–3",
-      "Charge his biggest blob or any Defense-2 vehicle — 13 AP1 dice shred both",
-      "Round 4: park on a marker — Tough(12) won't be shifted",
+      "Deploy with a Berserker squad INSIDE — Transport(16) ferries the Slow squad up",
+      "Turn 1 drive forward (Fast); turn 2 they disembark and charge",
+      "Then park central and throw 16 shots a turn — Tough(18) + Sturdy soaks fire",
     ],
     avoid: [
-      "Never solo a Deadly(3) walker or tank — it out-trades you. Gang it",
-      "Don't get tar-pitted by chaff — Fatigue means you then hit on 6s only",
+      "Defense 2 — keep it away from AP4+ guns and Melee-Slayer chargers",
+      "Don't disembark and re-embark in one activation — that's illegal",
     ],
   },
   {
-    name: "Toxico-Rex",
+    name: "Assault Drill",
     count: "[1]",
     q: "4+",
     d: "2+",
-    tag: "ANVIL · LEAD WITH THIS",
-    tagColor: C.acc2,
-    dice: "MELEE: 12 @ 4+ (8 whip + 4 stomp)  ·  SHOOT: 2 @ 4+, Blast(3)",
-    use: [
-      "Push it ahead of the Carnivo to EAT the AP-Deadly fire",
-      "Regeneration ignores about 1/3 of every wound",
-      "Whip Limbs (Bane) shreds vehicles and ignores enemy Regeneration",
-    ],
-    avoid: [
-      "Don't hide it — its whole job is to soak fire up front",
-      "Don't fire Acid Spurt at a single big model (Blast caps at 1 hit)",
-    ],
-  },
-  {
-    name: "Hive Burrower",
-    count: "[1]",
-    q: "4+",
-    d: "2+",
-    tag: "AMBUSH",
+    tag: "AMBUSH · BACKFIELD ASSASSIN",
     tagColor: C.warn,
-    dice: "MELEE: roll 14 dice @ 4+  (9 claws + 5 stomp)",
+    dice: "CHARGE: Impact(6) + MELEE 6 @ 4+, AP4  ·  Flamer 1 @ 2+ Blast(3)",
     use: [
-      "Keep in reserve. Round 2, drop behind his lines by his best gun or fast unit",
-      "Charge it — kill what could reach and reclaim your markers",
-      "You alternate placing reserves — denies his ambush free rein",
+      "Start in reserve. Round 2, drop over 9\" behind his lines",
+      "Land beside his artillery, gun team, or a tank — then charge",
+      "Impact(6) + 6 attacks at AP4 delete most support in one go",
     ],
     avoid: [
-      "Won't wipe a team — it kills about 1–2 of 3 models",
       "Can't seize the round it lands — don't drop onto a marker to hold it",
+      "Don't drop it isolated — focus-fire can kill it before it charges",
     ],
   },
   {
-    name: "Soul-Snatchers",
+    name: "Attack Vehicle",
+    count: "[1]",
+    q: "4+",
+    d: "2+",
+    tag: "FAST · TANK-HUNTER",
+    tagColor: C.acc2,
+    dice: "SHOOT: 2 dice @ 4+, AP4, Deadly(3)  ·  Impact(3)",
+    use: [
+      "Slide to a flank turn 1 — Fast + Strider reposition anywhere",
+      "Line up his transports, tanks, walkers — 2 AP4 Deadly(3) hits wreck them",
+      "Shoot from cover and stay hidden between shots",
+    ],
+    avoid: [
+      "Only Tough 6 / Defense 2 — never park it in the open",
+      "Don't shoot it at a horde, and don't charge it into melee",
+    ],
+  },
+  {
+    name: "Berserkers + Berserker Veteran",
+    count: "[5+1]",
+    q: "4+",
+    d: "5+",
+    tag: "COUNTER-PUNCH · vs TOUGH",
+    tagColor: C.acc,
+    dice: "MELEE: 6 dice @ 4+, AP2 → AP4 vs Tough on the charge  ·  Furious",
+    use: [
+      "Ride the Fortress Tank turn 1; disembark and charge turn 2",
+      "Aim at his vehicles, walkers, monsters — Melee Slayer = AP4 charging",
+      "Fearless — they hold a marker through morale",
+    ],
+    avoid: [
+      "NEVER walk them — Slow (4\"/8\"). No Tank ride = out of the game",
+      "Defense 5 up close — don't sit in the open before you charge",
+    ],
+  },
+  {
+    name: "Berserkers + Dwarf Champion",
+    count: "[5+1]",
+    q: "4+",
+    d: "5+",
+    tag: "HOLD CENTRE · COUNTER",
+    tagColor: C.acc,
+    dice: "MELEE: 5 axes @ 4+ AP2 (AP4 vs Tough) + 2 CCW @ 3+  ·  Furious",
+    use: [
+      "Anchor the CENTRAL marker with Fearless bodies",
+      "Counter-charge anyone who comes for it — AP4 into his Tough units",
+      "Champion adds Q3 swings and Fortified on himself",
+    ],
+    avoid: [
+      "Slow — pick a marker and hold/counter, don't chase across the table",
+      "Fortified only protects the Champion model, not the whole squad",
+    ],
+  },
+  {
+    name: "Sniper Team",
+    count: "[3]",
+    q: "4+",
+    d: "5+",
+    tag: "SCOUT · HERO KILLER",
+    tagColor: C.warn,
+    dice: "SHOOT: 3 dice @ 2+ (Reliable), AP1, Takedown",
+    use: [
+      "Scout deploys it within 12\" — clean lane to his back line",
+      "Takedown his hero, caster, or key gun model — pull it from the squad",
+      "Sit in cover at 30\"; Stealth + Sturdy keep it alive all game",
+    ],
+    avoid: [
+      "Don't melee — Slow and weak in combat. It's a 30\" rifle",
+      "Don't expose it to a charge — only 3 single-wound models",
+    ],
+  },
+  {
+    name: "Iron Veterans",
     count: "[5]",
     q: "3+",
-    d: "4+",
-    tag: "SCORER · TANK-GRINDER",
-    tagColor: C.acc,
-    dice: "MELEE: roll 10 dice @ 3+, Rending  (5 models × 2)",
-    use: [
-      'Fast — 16" Rush. Tag a marker, then peel off and kill — don\'t camp',
-      "Hunt his transports and pop them before the cargo climbs out",
-      "Rending 6s become high-AP — grind the Defense-2 tanks monsters can't reach",
-    ],
-    avoid: [
-      'Don\'t push 9"+ ahead of a monster — D4 / 5 wounds, they melt to one shot',
-      "Don't waste them as a speed bump — they're your scorers",
-    ],
-  },
-  {
-    name: "Mortar Beast",
-    count: "[1]",
-    q: "4+",
     d: "3+",
-    tag: "ANTI-HORDE",
+    tag: "HOME GUARD · THE WALL",
     tagColor: C.acc2,
-    dice: "SHOOT: roll 2 dice @ 4+ (5+ if it moved)  ·  Blast(3), Indirect",
+    dice: "SHOOT (≤6\"): 10 dice @ 3+, AP2  ·  MELEE 5 @ 3+",
     use: [
-      "Park it in the backfield and NEVER move it",
-      "Gun down anything creeping toward your seized markers — no line of sight needed",
-      "Blast3 is also your answer to a massed Ork swarm",
+      "Plant them on your key marker and STAY",
+      "Sturdy = Defense 2 at range — tanks the gunline",
+      "Anything that closes within 6\" eats 10 AP2 shots first",
     ],
     avoid: [
-      "Don't move it — −1 to hit halves its output",
-      "Don't shoot single big models (Blast caps at 1)",
+      "Don't push them forward — 6\" guns + Slow = useless advancing",
+      "Inside 9\" they're plain D3 — keep cover between them and his guns",
     ],
   },
   {
-    name: "Snatcher Lord",
-    count: "[1]",
-    q: "3+",
+    name: "Thunder Support",
+    count: "[3]",
+    q: "4+",
     d: "4+",
-    tag: "FAST FLANKER · HERO",
-    tagColor: C.warn,
-    dice: "MELEE: roll 4 dice @ 3+, Rending",
+    tag: "ARTILLERY · ANTI-HORDE",
+    tagColor: C.acc2,
+    dice: "SHOOT: 3 dice @ 4+ (5+ if moved)  ·  Blast(3), Indirect",
     use: [
-      "Send him wide to tag a far marker early — control sticks, it stays yours",
-      "Then hunt his backfield units that could circle back to reclaim it",
+      "Park in backfield cover and NEVER move it",
+      "Lob Blast(3) Indirect into his densest blob — no line of sight needed",
+      "Vital vs Orc Marauders; vs a gunline, hit his biggest squad",
     ],
     avoid: [
-      "Keep him behind a beast vs snipers — Takedown one-shots a Tough(3) hero",
-      'Strider, NOT Fast — only 6" / 12" of movement',
+      "Don't move it — −1 to hit guts its output",
+      "Don't fire at single big models (Blast caps at 1)",
     ],
   },
 ];
@@ -271,7 +308,7 @@ const TitleScene: React.FC<{ dur: number }> = ({ dur }) => (
   <Wrap dur={dur}>
     <Rise delay={0}>
       <div style={{ fontSize: 40, color: C.acc2, letterSpacing: 8, fontWeight: 700 }}>
-        🐛 GRIMDARK FUTURE · FIELD GUIDE
+        ⛏️ GRIMDARK FUTURE · FIELD GUIDE
       </div>
     </Rise>
     <Rise delay={8}>
@@ -286,16 +323,16 @@ const TitleScene: React.FC<{ dur: number }> = ({ dur }) => (
           textShadow: "0 6px 30px rgba(0,0,0,.5)",
         }}
       >
-        ALIEN HIVES
+        DWARF GUILDS
       </div>
     </Rise>
     <Rise delay={16}>
       <div style={{ fontSize: 46, color: C.muted, marginTop: 8 }}>
-        How to play your army · 1500 pts
+        "Iron Counter-Punch" · How to play it · 2000 pts
       </div>
     </Rise>
     <Rise delay={26} style={{ marginTop: 34 }}>
-      <Chip color={C.acc}>YOU WIN ON MARKERS — NOT KILLS</Chip>
+      <Chip color={C.acc}>TURTLE UP — THEN COUNTER-PUNCH</Chip>
     </Rise>
   </Wrap>
 );
@@ -341,12 +378,12 @@ const BigIdeaScene: React.FC<{ dur: number }> = ({ dur }) => (
           lineHeight: 1.4,
         }}
       >
-        Tag a marker and it's <b style={{ color: C.ink }}>yours — even after you leave</b>, until he touches it. Both on one = only a <b style={{ color: C.ink }}>tie</b>. So <b style={{ color: C.acc }}>seize early, then drive in and kill.</b>
+        Tag a marker and it's <b style={{ color: C.ink }}>yours — even after you leave</b>, until he touches it. Both on one = only a <b style={{ color: C.ink }}>tie</b>. You're <b style={{ color: C.ink }}>Slow</b>, so <b style={{ color: C.acc }}>turtle the close cluster, then counter-punch.</b>
       </div>
     </Rise>
     <div style={{ display: "flex", gap: 26, marginTop: 46, width: "100%", maxWidth: 1500 }}>
-      <Pillar delay={20} icon="🚩" head="Seize early" sub="Tag markers turn 1 — control sticks; they stay yours after you leave." />
-      <Pillar delay={30} icon="🦖" head="Then go kill" sub="Drive the monsters into his army. A dead unit can't take your ground back." />
+      <Pillar delay={20} icon="🛡️" head="Turtle up" sub="Seize the close markers and hold them on Sturdy bodies — +1 Defense vs his shooting." />
+      <Pillar delay={30} icon="⛏️" head="Counter-punch" sub="Ambush Drill + Fast vehicles + Berserker charges kill whatever could reach your ground." />
       <Pillar delay={40} icon="🎯" head="Own, don't tie" sub="Clear enemies off a marker to own it. A shared marker scores nobody." />
     </div>
   </Wrap>
@@ -534,10 +571,10 @@ const StrategyScene: React.FC<{ dur: number }> = ({ dur }) => (
         THE GAME PLAN
       </div>
     </Rise>
-    <Round delay={10} n="R1" head="TAG THE MARKERS" body="Rush out and seize the nearest markers — they stay yours after you leave." color={C.acc2} />
-    <Round delay={22} n="R2–3" head="KILL EVERYTHING" body="Drive the monsters into his army — destroy anything that could reach and reclaim your markers." color={C.acc} />
-    <Round delay={34} n="R4" head="OWN OUTRIGHT" body="Clear every enemy off the markers you want. Don't settle for a contested tie." color={C.warn} />
-    <Round delay={46} n="WIN" head="MOST MARKERS = VICTORY" body="Kill him off the ground and own the count when Round 4 ends." color={C.danger} />
+    <Round delay={10} n="R1" head="TAG & ROLL UP" body="Seize the close markers; roll the Fortress Tank up with a Berserker squad inside." color={C.acc2} />
+    <Round delay={22} n="R2" head="COUNTER-PUNCH" body="Drill ambushes his backline; Berserkers disembark and charge — AP4 into his Tough stuff." color={C.acc} />
+    <Round delay={34} n="R3–4" head="HOLD & OWN" body="Hold your ground, kill anything that could reach a marker, clear him off the points you want." color={C.warn} />
+    <Round delay={46} n="WIN" head="MOST MARKERS = VICTORY" body="Make him break on the Sturdy wall, then own the count when Round 4 ends." color={C.danger} />
   </Wrap>
 );
 
@@ -557,7 +594,7 @@ const OutroScene: React.FC<{ dur: number }> = ({ dur }) => {
         </div>
       </div>
       <Rise delay={20} style={{ marginTop: 40 }}>
-        <Chip color={C.acc}>BEASTS SOAK · FAST UNITS SCORE · KILL BILL 🐛</Chip>
+        <Chip color={C.acc}>STURDY WALL HOLDS · DRILL & AXES COUNTER · KILL BILL ⛏️</Chip>
       </Rise>
     </Wrap>
   );
