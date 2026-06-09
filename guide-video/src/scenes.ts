@@ -5,8 +5,8 @@ export const FPS = 30;
 export const WIDTH = 1920;
 export const HEIGHT = 1080;
 
-// ElevenLabs voice to narrate the guide.
-export const VOICE_ID = "wyWA56cQNU2KqUW4eCsI";
+// ElevenLabs voice to narrate the guide. Rachel (premade) — confirmed callable on this account.
+export const VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
 export type SceneMeta = {
   id: string; // also the mp3 filename stem
